@@ -1,0 +1,27 @@
+version: '3'
+services:
+        nginx:
+                container_name: nginx
+                build: ./nginx
+                image: docker/nginx
+                #restart: always
+                ports:
+                        - "80:80"
+                network_mode: "host"
+                depends_on:
+                        - gunicorn
+
+
+        gunicorn:
+                container_name: gunicorn
+                build: ./cos_project3
+                image: docker/gunicorn
+                #restart: always
+                working_dir: /srv/docker
+                command: /bin/bash
+                command: gunicorn --bind 0.0.0.0:8000 cos.wsgi:application
+                network_mode: "host"
+                #volumes:
+                #        - ./docker:/srv/docker
+                #
+              
