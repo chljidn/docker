@@ -24,6 +24,10 @@ class auth_user_request_tests(APITestCase):
         token = response.data['access']
         self.assertEqual(response.status_code, 200)
 
+    def test_user_login_error(self):
+        response = self.client.post(self.auth_url, {'username': 'test', 'password': 'testpasswd'}, format='json')
+        self.assertEqual(response.status_code, 400)
+
     # 유저 정보 읽기(마이 페이지)
     def test_user_get(self):
         # HTTP_AUTHORIZATION 을 사용하기 위함
@@ -40,9 +44,8 @@ class auth_user_request_tests(APITestCase):
         response = self.client.post(self.auth_url, {'username': 'test', 'password': 'testpasswd123'}, format='json')
         token = response.data['access']
         client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
-        response = client.put(self.useredit_url,
+        response = client.patch(self.useredit_url,
                               {
-                                  'username' : 'test',
                                   'sex' : 'F',
                                   'birth' : '1996-05-05',
                                   'email': 'testupdate@test.com'

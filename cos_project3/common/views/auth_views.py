@@ -8,7 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.http import QueryDict
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
 
 from common.serializers import MyTokenObtainPairSerializer, UserSerializers
 from common.models import User
@@ -75,7 +75,7 @@ class userEdit(APIView):
         else:
             return Response({'message' : '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    def put(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             user = User.objects.filter(id=request.user.id)
             if not request.data.get('password', False):
@@ -87,7 +87,6 @@ class userEdit(APIView):
                     password = make_password(request.data['password'])
 
             user.update(
-                username=request.user.username,
                 password=password,
                 sex=request.data['sex'],
                 birth=request.data['birth'],

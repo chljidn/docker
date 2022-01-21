@@ -6,6 +6,8 @@ from rest_framework import status
 from rest_framework.renderers import TemplateHTMLRenderer # html 렌더링 하기 위함
 # 페이징
 from rest_framework.pagination import PageNumberPagination
+from common.paginations import QaPagination
+# 데코레이터
 from rest_framework.decorators import action
 # 해쉬 암호화 모듈
 from django.contrib.auth.hashers import make_password, check_password
@@ -29,9 +31,7 @@ class qa(viewsets.ModelViewSet):
     # 파라미터 필드 지정
     filterset_class = QaFilter
     # pagination_class는 [PageNumberPagination] 처럼 리스트 형식으로 선언하면 에러 발생.
-    pagination_class = PageNumberPagination
-    # 한 페이지 당 qna 20개 씩
-    PageNumberPagination.page_size = 20
+    pagination_class = QaPagination
 
     # post로 데이터가 넘어올 경우에는 저장과 인증 필요
     def create(self, request, *args, **kwargs):
@@ -61,23 +61,29 @@ class qa(viewsets.ModelViewSet):
     # 이럴 때 actions을 사용하여 다르게 작동할 수 있는 post를 만든다
     # detail=True를 사용하면 pk를 받겠다는 의미이며, url은 common/qa/{pk}/qa_detail/ 이 된다.
     # qa_detail은 함수 이름이다.
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['get', 'post'])
     def qa_detail(self, request, pk=None):
         try:
             qaDetail = Qa.objects.get(id=pk)
         except exceptions.ObjectDoesNotExist:
-            return Response({"message" : "Q&A가 존재하지 않습니다."})
+            return Response({"message": "Q&A가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
         else:
-            # 패스워드를 아예 보내지 않았거나 패스워드가 ''일 경우는 None으로 처리
-            password = request.data.get('password', None)
-            if password == '': password = None
-            # 유저가 스태프일 경우 그냥 확인할 수 있고, 아닐 경우는 패스워드 비교
-            if qaDetail.password == password or request.user.is_staff:
-                qaDetailSerializer = serializers.QaSerializers(data=[qaDetail], many=True)
-                qaDetailSerializer.is_valid()
-                return Response(qaDetailSerializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response({"message" : "패스워드가 일치하지 않습니다. 다시 시도해 주십시오."}, status=status.HTTP_401_UNAUTHORIZED)
+            if request.method == "GET":
+                if qaDetail.password != None:
+                    return Response({'message' : '패스워드가 필요합니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    qaDetailSerializer = serializers.QaSerializers(data=[qaDetail], many=True)
+                    qaDetailSerializer.is_valid()
+                    return Response(qaDetailSerializer.data, status=status.HTTP_200_OK)
+
+            if request.method == 'POST':
+                # 유저가 스태프일 경우 그냥 확인할 수 있고, 아닐 경우는 패스워드 비교
+                if qaDetail.password == request.data['password'] or request.user.is_staff:
+                    qaDetailSerializer = serializers.QaSerializers(data=[qaDetail], many=True)
+                    qaDetailSerializer.is_valid()
+                    return Response(qaDetailSerializer.data, status=status.HTTP_200_OK)
+                else:
+                    return Response({"message" : "패스워드가 일치하지 않습니다. 다시 시도해 주십시오."}, status=status.HTTP_401_UNAUTHORIZED)
 
 # QNA 리플 기능
 # qna에 패스워드를 쳐야만 들어올 수 있으므로 리플 기느에 제한을 둘 필요는 없을 듯 함
