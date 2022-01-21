@@ -79,14 +79,13 @@ class recommend:
             ffflist[j] = (k, j)
         ffflist = sorted(ffflist, reverse=True)
         result = []
-        for i in range(10):
-            idx = ffflist[i][1]
-            result.append({'prdname': data2[idx].prdname,
-                           'ingredient': data2[i].ingredient,
-                           'image': data2[i].image,
-                           'brand': data2[i].brand,
-                           'price': data2[i].price,
-                           'cosine': str(ffflist[i][0])})
+        for i in ffflist[:10]:
+            result.append({'prdname': data2[i[1]].prdname,
+                           'ingredient': data2[i[1]].ingredient,
+                           'image': data2[i[1]].image,
+                           'brand': data2[i[1]].brand,
+                           'price': data2[i[1]].price,
+                           'cosine': i[0]})
         return result
 
 

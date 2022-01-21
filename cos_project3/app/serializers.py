@@ -18,7 +18,7 @@ class RecommendSerializer(serializers.Serializer):
     image = serializers.CharField()
     brand = serializers.CharField()
     price = serializers.CharField()
-    cosine = serializers.CharField()
+    cosine = serializers.FloatField()
 
 class CosReviewSerializer(serializers.Serializer):
     class Meta:
