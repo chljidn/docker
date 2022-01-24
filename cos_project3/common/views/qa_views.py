@@ -33,6 +33,9 @@ class qa(viewsets.ModelViewSet):
     # pagination_class는 [PageNumberPagination] 처럼 리스트 형식으로 선언하면 에러 발생.
     pagination_class = QaPagination
 
+    # def get_queryset(self):
+    #     pass
+
     # post로 데이터가 넘어올 경우에는 저장과 인증 필요
     def create(self, request, *args, **kwargs):
         # 패스워드가 아예 없거나 ''인 경우는 None로 처리.
@@ -85,11 +88,44 @@ class qa(viewsets.ModelViewSet):
                 else:
                     return Response({"message" : "패스워드가 일치하지 않습니다. 다시 시도해 주십시오."}, status=status.HTTP_401_UNAUTHORIZED)
 
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        instance = self.get_object()
+        # qna 객체가 기존에 패스워드 값을 가지고 있는데 패스워드가 일치하지 않을 경우에만 error 리턴
+        if getattr(instance, 'password'):
+            if instance.password != request.data['password']:
+                return Response({'message':'패스워드가 일치하지 않습니다. 패스워드를 다시 확인해 주세요.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # qna 객체가 애초에 없거나, 있어도 패스워드가 일치하는 경우.
+        # 여기서부터는 ModelViewSet의 기존 코드와 모드 일치한다.
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+
+        # 패스워드가 있는 경우만 재정의하고, 나머지는 부모클래스의 partial_update를 그대로 사용한다.
+
+        # print(request.data)
+        # if password_qna.password != None:
+        #     if request.user == password_qna.qa_user:
+        #         if request.password == password_qna.password:
+        #             password_qna.update(**kwargs)
+        #         else: return Response({'message' : '패스워드가 일치하지 않습니다. 패스워드를 다시 확인해주세요.'})
+        #     else: return Response({'message' : '게시글의 작성자만 수정할 수 있습니다.'})
+        # else:
+
+
 # QNA 리플 기능
 # qna에 패스워드를 쳐야만 들어올 수 있으므로 리플 기느에 제한을 둘 필요는 없을 듯 함
 # 패스워드가 없는 qna라면 이미 작성자가 공개적으로 개방하겠다는 뜻으로 받아들여 리플 기능을 제한하지 않는다
 # get은 qa에서 가져올 수 있으므로 작성하지 앟는다
-
 class qaReple(viewsets.ViewSet):
     permission_classes = []
 

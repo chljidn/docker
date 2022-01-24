@@ -116,13 +116,20 @@ class qa_request_tests(APITestCase):
 
     # qna 상세 페이지 수정.
     def test_qa_detail_update(self):
-        url = reverse('common:qa-list')
         # 현재까지는 qna 수정의 경우, 기존 ModelViewSet의 partial_update를 수정하지 않고 그대로 사용하므로 url은 기존 url에 pk가 붙은 common/qa/{pk}/가 왼다.
         # password 수정등이 있기 때문에 오버라이드 해야함.
-        response = self.apiclient.patch(f'{url}{self.qa1.id}/', {'content' : 'setup1 수정'}, format='json')
+        response = self.apiclient.patch(f'{self.qa_url}{self.qa1.id}/', {'content' : 'setup1 수정'}, format='json')
         self.assertEqual(response.status_code, 200)
-        # response = self.apiclient.patch(f'{url}{self.qa2.id}/', {'content' : 'setup1 수정', }, format='json')
+        response = self.apiclient.patch(f'{self.qa_url}{self.qa2.id}/', {'content' : 'setup2 수정', 'password': 'setup2'}, format='json')
+        self.assertEqual(response.status_code, 200)
 
+    def test_qa_detail_update_eror(self):
+        # 패스워드가 틀렸을 경우
+        response = self.apiclient.patch(f'{self.qa_url}{self.qa2.id}/', {'content' : 'setup2 수정', 'password': 'setup1'}, format='json')
+        self.assertEqual(response.status_code, 401)
+        # 유저가 일치하지 않을 경우
+        #
+    
     def test_qa_detail_delete(self):
         pass
 
