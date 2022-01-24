@@ -3,7 +3,7 @@ from app.models import Cos
 # cache server
 from django.core.cache import cache
 # 성분추출함수에 쓰일 패키지 설치
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image
 from pytesseract import *
 import pandas as pd
 # 코사인 유사도에 쓰일 패키지

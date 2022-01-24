@@ -15,7 +15,6 @@ from common.models import User
 from app.views.recommend import recommend
 # 캐시 사용 위해 설치
 from django.core.cache import cache
-from django.core.files.storage import Storage
 
 
 # 이미지 업로드 페이지

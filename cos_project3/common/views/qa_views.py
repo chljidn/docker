@@ -1,11 +1,8 @@
 # rest_framework 관련 설치
 from rest_framework import viewsets
-from rest_framework.views import APIView # 모든 함수를 클래스뷰로 하기 위해서 import
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.renderers import TemplateHTMLRenderer # html 렌더링 하기 위함
 # 페이징
-from rest_framework.pagination import PageNumberPagination
 from common.paginations import QaPagination
 # 데코레이터
 from rest_framework.decorators import action
