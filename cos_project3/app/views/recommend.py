@@ -28,7 +28,8 @@ class recommend:
     def text(self):
         arg = self.link
         os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/4.00/tessdata/'
-        image = Image.open('./.' + arg)
+        print('././media/' + str(arg))
+        image = Image.open('././media/'+str(arg))
         x = int(1920 / image.size[0])
         y = int(1080 / image.size[1])
         if x != 0:
@@ -62,7 +63,7 @@ class recommend:
             if len(lst) != 0:
                 lst2.append(lst[0][1])
         lst2 = ', '.join(lst2)
-        data2 = cache.get_or_set('cosin_cos', Cos.objects.all())
+        data2 = cache.get_or_set('cosine_cos', Cos.objects.all())
         ffflist = []
         # ffflist에는 각각의 코사인유사도와 상품의 인덱스 번호가 들어간다
         # ffflist = [(0.1231545, 0), (0.321516, 1) ...]와 같은 형식으로 데이터가 담긴다.

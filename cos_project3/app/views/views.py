@@ -15,6 +15,7 @@ from common.models import User
 from app.views.recommend import recommend
 # 캐시 사용 위해 설치
 from django.core.cache import cache
+from django.core.files.storage import Storage
 
 
 # 이미지 업로드 페이지
@@ -27,7 +28,8 @@ class image_upload(viewsets.ViewSet):
         image.pic = request.FILES['pic']
         image.save()
         # recommend class의 객체 생성
-        recommend_function = recommend(image.pic.url)
+        # image.pic.url로 하면 한글파일의 경우 파일 이름의 인코딩 에러 발생.
+        recommend_function = recommend(image.pic)
         # 추출된 성분 문자열로 코사인 유사도 수행.
         result = recommend_function.cosine()
         result_serializer = RecommendSerializer(result, many=True)
