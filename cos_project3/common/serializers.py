@@ -21,9 +21,10 @@ class UserSerializers(serializers.ModelSerializer):
     class Meta:
         model=User
         # ManyToMany 필드인 like를 같이 넣는다.
-        fields = ('username', 'password', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set')
+        fields = ('username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set')
 
 class QaRepleSerializer(serializers.ModelSerializer):
+    repleUser = serializers.StringRelatedField()
     class Meta:
         model= QaReple
         fields = '__all__'
@@ -32,12 +33,12 @@ class QaSerializers(serializers.ModelSerializer):
     # StringRelateField로 설정하면 username만 가져온다
     # 즉 User 모델에서 def __str__ 로 설정한 필드값만 직렬화에 포함된다.
     qa_user = serializers.StringRelatedField()
-    qa_reple_set = QaRepleSerializer(read_only=True, many=True)
+    qareple_set = QaRepleSerializer(read_only=True, many=True)
     # 내보낼 때에는 년/월/일만
     qaDate = serializers.DateTimeField(format="%Y-%m-%d")
     class Meta:
         model = Qa
-        fields = ['id', 'postname', 'content', 'qa_user', 'qaDate', 'qa_reple_set']
+        fields = ['id', 'postname', 'content', 'qa_user', 'qaDate', 'qareple_set']
 
     # def validate(self, attrs):
     #     data = super().validate(attrs)

@@ -47,7 +47,7 @@ class qa(viewsets.ModelViewSet):
                 qa_user=request.user,
             )
             qa.save()
-            return Response({'message':'게시글이 저장되었습니다.'},
+            return Response({'message':'질문글이 저장되었습니다.'},
                             status=status.HTTP_201_CREATED
                             )
         else:
@@ -61,6 +61,7 @@ class qa(viewsets.ModelViewSet):
     # 이럴 때 actions을 사용하여 다르게 작동할 수 있는 post를 만든다
     # detail=True를 사용하면 pk를 받겠다는 의미이며, url은 common/qa/{pk}/qa_detail/ 이 된다.
     # qa_detail은 함수 이름이다.
+    # retrieve 함수로 수정할까 했지만, post로 받지 못하기 때문에 이대로 사용.
     @action(detail=True, methods=['get', 'post'])
     def qa_detail(self, request, pk=None):
         try:
@@ -75,9 +76,9 @@ class qa(viewsets.ModelViewSet):
                     qaDetailSerializer = serializers.QaSerializers(data=[qaDetail], many=True)
                     qaDetailSerializer.is_valid()
                     return Response(qaDetailSerializer.data, status=status.HTTP_200_OK)
-
             if request.method == 'POST':
-                # 유저가 스태프일 경우 그냥 확인할 수 있고, 아닐 경우는 패스워드 비교
+                # 유저가 스태프
+                # 일 경우 그냥 확인할 수 있고, 아닐 경우는 패스워드 비교
                 if qaDetail.password == request.data['password'] or request.user.is_staff:
                     qaDetailSerializer = serializers.QaSerializers(data=[qaDetail], many=True)
                     qaDetailSerializer.is_valid()
@@ -88,6 +89,10 @@ class qa(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         instance = self.get_object()
+        # 유저가 일치하는지 확인. 추후 메서드로 만들어 놓을 것.
+        if request.user != instance.qa_user:
+            return Response({'message': '질문을 수정할 수 있는 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
+
         # qna 객체가 기존에 패스워드 값을 가지고 있는데 패스워드가 일치하지 않을 경우에만 error 리턴
         if getattr(instance, 'password'):
             if instance.password != request.data['password']:
@@ -106,6 +111,14 @@ class qa(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user != instance.qa_user:
+            return Response({'message' : '질문글을 삭제할 수 있는 권한이 없습니다. 작성자만이 질문글을 삭제할 수 있습니다.'}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
 # QNA 리플 기능
 # qna에 패스워드를 쳐야만 들어올 수 있으므로 리플 기능에 제한을 두지 않는다
 # 패스워드가 없는 qna라면 이미 작성자가 공개적으로 개방하겠다는 뜻으로 받아들여 리플 기능을 제한하지 않는다
@@ -120,7 +133,7 @@ class qaReple(viewsets.ViewSet):
             reple = QaReple.objects.create(
                 content=request.data['content'],
                 # qa_id는 ForeignKey이기 때문에 해당 Qa 객체가 들어가야 한다.
-                # 이 부분은 차후 수정할 예정
+                # 이 부분은 차후 수정할 예정문
                 qa=Qa.objects.get(id=request.data['pk']),
                 repleUser=request.user
             )

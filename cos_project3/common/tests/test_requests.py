@@ -91,6 +91,11 @@ class qa_request_tests(APITestCase):
         response = self.apiclient.post(self.qa_url, {'postname' : 'request2', 'content' : 'request2', 'password':'request2'})
         self.assertEqual(response.status_code, 201)
 
+    # 게시글 생성 에러 테스트
+    def test_qa_create_error(self):
+        # 로그인되어 있지 않은 경우
+        pass
+
     # 전체 qna 데이터 읽기
     def test_qa_list_get(self):
         response = self.client.get(self.qa_url)
@@ -117,9 +122,10 @@ class qa_request_tests(APITestCase):
     # qna 상세 페이지 수정.
     def test_qa_detail_update(self):
         # 현재까지는 qna 수정의 경우, 기존 ModelViewSet의 partial_update를 수정하지 않고 그대로 사용하므로 url은 기존 url에 pk가 붙은 common/qa/{pk}/가 왼다.
-        # password 수정등이 있기 때문에 오버라이드 해야함.
+        # 패스워드가 있는 경우
         response = self.apiclient.patch(f'{self.qa_url}{self.qa1.id}/', {'content' : 'setup1 수정'}, format='json')
         self.assertEqual(response.status_code, 200)
+        # 패스워드가 없는 경
         response = self.apiclient.patch(f'{self.qa_url}{self.qa2.id}/', {'content' : 'setup2 수정', 'password': 'setup2'}, format='json')
         self.assertEqual(response.status_code, 200)
 
@@ -128,10 +134,14 @@ class qa_request_tests(APITestCase):
         response = self.apiclient.patch(f'{self.qa_url}{self.qa2.id}/', {'content' : 'setup2 수정', 'password': 'setup1'}, format='json')
         self.assertEqual(response.status_code, 401)
         # 유저가 일치하지 않을 경우
-        #
+
     
     def test_qa_detail_delete(self):
+        # 패스워드 없는 질문글을 지울 경우
+        response = self.apiclient.delete(f'{self.qa_url}{self.qa1.id}/')
+        self.assertEqual(response.status_code, 204)
+
+    def test_qa_detail_delete(self):
+        # 유저가 일치하지 않는데 삭제하려는 경우
         pass
 
-    def test_not_auth_create(self):
-        pass
