@@ -116,7 +116,7 @@ class Qa(models.Model):
     # user 테이블의 기본키인 id를 외래키로 사용하게 된다.
     # 한 유저당 여러 개의 Q&A를 작성할 수 있으므로 기본키는 따로 존재하고 외래키는 기본키로 쓰이지 않는다.
     # user(1) --- qa(N)
-    qa_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id', default=None)
+    qa_user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='qa_user', default=None)
     qaDate = models.DateTimeField(default=timezone.now)
     def __str__(self):
         return self.postname

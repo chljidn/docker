@@ -38,6 +38,7 @@ class qa(viewsets.ModelViewSet):
         # 패스워드가 아예 없거나 ''인 경우는 None로 처리.
         # 모델 설정에서 default=None로 설정했기 때문에 가능.
         password = request.data.get('password', None)
+        print(request)
         if password == '': password = None
         if request.user.is_authenticated:
             qa = Qa.objects.create(

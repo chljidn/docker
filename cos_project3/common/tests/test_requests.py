@@ -129,7 +129,7 @@ class qa_request_tests(APITestCase):
         response = self.apiclient.patch(f'{self.qa_url}{self.qa2.id}/', {'content' : 'setup2 수정', 'password': 'setup2'}, format='json')
         self.assertEqual(response.status_code, 200)
 
-    def test_qa_detail_update_eror(self):
+    def test_qa_detail_update_error(self):
         # 패스워드가 틀렸을 경우
         response = self.apiclient.patch(f'{self.qa_url}{self.qa2.id}/', {'content' : 'setup2 수정', 'password': 'setup1'}, format='json')
         self.assertEqual(response.status_code, 401)
@@ -140,8 +140,12 @@ class qa_request_tests(APITestCase):
         # 패스워드 없는 질문글을 지울 경우
         response = self.apiclient.delete(f'{self.qa_url}{self.qa1.id}/')
         self.assertEqual(response.status_code, 204)
+        # 패스워드가 있는 질문글을 지울 경우
+        response = self.apiclient.delete(f'{self.qa_url}{self.qa2.id}/', {'password': 'setup2'}, format='json')
+        self.assertEqual(response.status_code, 204)
 
-    def test_qa_detail_delete(self):
+
+    def test_qa_detail_delete_error(self):
         # 유저가 일치하지 않는데 삭제하려는 경우
         pass
 

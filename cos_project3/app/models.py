@@ -27,6 +27,9 @@ class Cos(models.Model):
     category = models.TextField(blank=True, null=True)
     like = models.ManyToManyField(User, related_name='like', blank=True)
 
+    def __str__(self):
+        return self.prdname
+
 class CosReviewModel(models.Model):
     reviewName = models.CharField(max_length=500, blank=False)
     reviewImage = models.ImageField(blank=True, upload_to='reviewImages')

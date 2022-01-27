@@ -20,7 +20,9 @@ class RecommendSerializer(serializers.Serializer):
     price = serializers.CharField()
     cosine = serializers.FloatField()
 
-class CosReviewSerializer(serializers.Serializer):
+class CosReviewSerializer(serializers.ModelSerializer):
+    reviewCos = serializers.StringRelatedField()
+    reviewUser = serializers.StringRelatedField()
     class Meta:
         model = CosReviewModel
         fields = ('reviewName', 'reviewImage', 'reviewContent', 'reviewUser', 'reviewCos')
