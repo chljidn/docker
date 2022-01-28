@@ -25,4 +25,4 @@ class CosReviewSerializer(serializers.ModelSerializer):
     reviewUser = serializers.StringRelatedField()
     class Meta:
         model = CosReviewModel
-        fields = ('reviewName', 'reviewImage', 'reviewContent', 'reviewUser', 'reviewCos')
+        fields = ('id', 'reviewName', 'reviewImage', 'reviewContent', 'reviewUser', 'reviewCos')

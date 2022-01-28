@@ -193,7 +193,10 @@ CORS_ALLOW_CREDENTIALS = True
 
 # rest_framework
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend'),
+    # 디폴트 필터. 리스트 형식으로 지정해야 한다. 튜플 X
+    # 필터 사용에도 관련이 있지만, pk를 접미사로 붙일수 있는지 여부에도 영향을 미친다.
+    # 지정하지 않을 경우, pk를 접미사로 붙이지 못하고 쿼리를 따로 써서 요청해야 한다.
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     # pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 60,

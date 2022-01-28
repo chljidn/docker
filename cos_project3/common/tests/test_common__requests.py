@@ -149,3 +149,6 @@ class qa_request_tests(APITestCase):
         # 유저가 일치하지 않는데 삭제하려는 경우
         pass
 
+class qa_reple_requests_tests(APITestCase):
+    def setUp(self):
+        pass

@@ -64,12 +64,13 @@ class cosLike(APIView):
             cos.like.add(user)
             return Response(status=status.HTTP_201_CREATED)
 
-class cosReview(viewsets.ViewSet):
+class cosReview(viewsets.ModelViewSet):
     queryset = CosReviewModel.objects.all()
     permission_classes = []
+    serializer_class = CosReviewSerializer
 
     def list(self, request):
-        reviewSerializer = CosReviewSerializer(data=self.queryset, many=True)
+        reviewSerializer = self.get_serializer(data=self.queryset, many=True)
         reviewSerializer.is_valid()
         return Response(reviewSerializer.data, status=status.HTTP_200_OK)
 
@@ -86,3 +87,11 @@ class cosReview(viewsets.ViewSet):
             return Response(status=status.HTTP_201_CREATED)
         else:
             return Response({'message' : '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        review = self.get_object()
+        if request.user == review.reviewUser:
+            return self.update(request, *args, **kwargs)
+        else:
+            return Response({'message' : '해당 글을 수정할 수 있는 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
