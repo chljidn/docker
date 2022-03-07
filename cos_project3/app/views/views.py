@@ -22,7 +22,6 @@ from django.core.cache import cache
 class image_upload(viewsets.ViewSet):
     permission_classes = []
     def create(self, request):
-        print(request)
         image = ImageUpload()
         image.title = request.POST['title']
         image.pic = request.FILES['pic']

@@ -11,7 +11,7 @@ from app.serializers import CosReviewSerializer
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cos
-        fields = ['id', 'prdname']
+        fields = ['id', 'prdname', 'brand']
 
 class UserSerializers(serializers.ModelSerializer):
     # like 컬럼(혹은 테이블) 안의 목록들은 다시 객체로 들어가기 때문에 그 객체들을 직렬화해주기 위함

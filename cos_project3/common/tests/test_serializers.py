@@ -22,8 +22,10 @@ class user_serializer_test(APITestCase):
         self.assertEqual(len(serializer.data), 2)
 
 class qa_serializer_test(APITestCase):
+
     def setUp(self):
         pass
+
     def test_qa_serializer(self):
         pass
 

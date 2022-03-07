@@ -60,6 +60,10 @@ INSTALLED_APPS = [
     'django_extensions', # show_urls 위해 설치
 
 ]
+GRAPH_MODELS = {
+  'all_applications': True,
+  'group_models': True,
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware', # cors 정책 때문에 있어야 함.

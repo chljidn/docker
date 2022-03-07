@@ -107,7 +107,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     get_full_name.short_description = _('Full name')
 
-
 # Q&A 게시판 모델
 class Qa(models.Model):
     postname = models.CharField(max_length=200)

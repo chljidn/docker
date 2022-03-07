@@ -1,6 +1,5 @@
 # 모델 설치
 from app.models import Cos
-
 # django_filters 설치
 from django_filters import rest_framework as filters
 
