@@ -11,9 +11,10 @@ RUN conda env create -f /srv/docker/environment.yaml
 
 # 환경변수 설정
 ENV PATH /opt/conda/envs/cos_project3/bin:$PATH
-#ENV /bin/bash -c cos_project3
-
+ENV /bin/bash -c cos_project3
 WORKDIR /srv/docker
+
+
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
