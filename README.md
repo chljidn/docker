@@ -23,7 +23,8 @@ docker
    ├── nginx
    │     ├── Dockerfile
    │     ├── nginx.conf
-   │     └── nginx-g.conf
+   │     ├── nginx-g.conf
+   │     └── dist(vue 빌드 파일)
    ├── cos_pcoject3
    │     ├── Dockerfile
    │     ├── cos
