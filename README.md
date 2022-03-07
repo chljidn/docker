@@ -19,7 +19,7 @@
 * docker-compose를 통해서 각각의 컨테이너를 완성한 후에 Dockerfile를 통해서 생성한 컨테이너들 세팅한다.
 * 디렉토리 구조: 
 ```bash
-docker
+docker 
    ├── nginx
    │     ├── Dockerfile
    │     ├── nginx.conf
