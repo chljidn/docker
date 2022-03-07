@@ -134,7 +134,7 @@ docker
     - viewset에 존재하는 함수는 mixin의 함수들을 상속받아 구성되어 있다.
     - retrieve(get), create(post), update(put), destroy(delete)
 
-## Database
+## DataBase
 * 기본적으로 django는 sqlite3를 사용한다.
 * 공용 데이터베이스가 따로 마련되어 있지 않으므로 cos_project3/recos_data.csv를 통해서 각각 데이터를 데이터베이스에 구축하여 사용하여야 한다. 
 * 현재 프로젝트는 MariaDB를 사용하지만, settings.py에 데이터베이스 환경은 따로 설정되어 있으므로 굳이 MariaDB가 아닌 각각 원하는 DB를 사용할 수 있다.
@@ -142,3 +142,6 @@ docker
 * ERD 이미지
 ![erd](https://github.com/chljidn/docker/blob/master/cos_project3/recos_erd.png?raw=true)
 
+# Cache DataBase(Redis)
+* 기존에는 django-redis를 사용하여 운용.
+* django 4.0부터 기본적인 캐시 프레임워크로 Redis가 제공되므로 업데이트 예정입니다.
