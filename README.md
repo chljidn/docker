@@ -139,5 +139,6 @@ docker
 * 공용 데이터베이스가 따로 마련되어 있지 않으므로 cos_project3/recos_data.csv를 통해서 각각 데이터를 데이터베이스에 구축하여 사용하여야 한다. 
 * 현재 프로젝트는 MariaDB를 사용하지만, settings.py에 데이터베이스 환경은 따로 설정되어 있으므로 굳이 MariaDB가 아닌 각각 원하는 DB를 사용할 수 있다.
 * 데이터베이스는 docker로 구성하지 않으며 추구 aws상에 구축할 예정이며, 상업적으로는 사용되지 않는다. 
-
+* ERD 이미지
+![erd](https://github.com/chljidn/docker/blob/master/cos_project3/recos_erd.png?raw=true)
 
