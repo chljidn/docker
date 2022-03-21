@@ -29,7 +29,6 @@ class image_upload(viewsets.ViewSet):
         # recommend class의 객체 생성
         # image.pic.url로 하면 한글파일의 경우 파일 이름의 인코딩 에러 발생.
         recommend_function = recommend(image.pic)
-        # 추출된 성분 문자열로 코사인 유사도 수행.
         result = recommend_function.cosine()
         result_serializer = RecommendSerializer(result, many=True)
         return Response(result_serializer.data)
@@ -37,8 +36,6 @@ class image_upload(viewsets.ViewSet):
 # 화장품 리스트 페이지
 class cos_list(viewsets.ModelViewSet):
     permission_classes = []
-    # pagination 사용 위해서 id를 기준으로 정렬시켜야 함.
-    # 작동하지 않는 것은 아니나 에러문구가 자꾸 나타나기 때문에 처리함.
     queryset = cache.get_or_set('coslist', Cos.objects.filter().distinct().order_by('id'))
     serializer_class = CosSerializer
     filter_backends = [DjangoFilterBackend]
@@ -48,18 +45,12 @@ class cos_list(viewsets.ModelViewSet):
 # ManyToManyField 사용
 class cosLike(APIView):
     def post(self, request):
-        # 요청한 유저 객체 생성
         user = User.objects.get(id=request.user.id)
-        # 현재 '좋아요' 버튼을 누른 화장품 객체를 가져온다.
         cos = Cos.objects.get(id=request.data['pk'])
-        # 만약 이미 '좋아요'를 해 놓은 화장품들 중에 지금 '좋아요'를 누른 화장품이 들어있다면
         if cos.like.filter(id=request.user.id):
-            # 화장품 객체의 like 컬럼에서 user 객체를 삭제한다. 따라서 app_cos_like 테이블에서 해당 row가 삭제된다.
             cos.like.remove(user)
             return Response(status=status.HTTP_200_OK)
         else:
-            # 화장품 객체의 like 컬럼에 user 객체를 집어넣는다.
-            # app_cos_like에 cos_id는 cos의 pk 값이고, user_id는 user의 id인 row가 생성된다.
             cos.like.add(user)
             return Response(status=status.HTTP_201_CREATED)
 
