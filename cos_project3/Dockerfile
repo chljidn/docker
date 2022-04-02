@@ -2,7 +2,6 @@ FROM continuumio/miniconda3
 
 RUN apt-get -y update
 RUN apt-get -y install vim
-
 RUN mkdir /srv/docker
 ADD . /srv/docker
 
@@ -13,8 +12,6 @@ RUN conda env create -f /srv/docker/environment.yaml
 ENV PATH /opt/conda/envs/cos_project3/bin:$PATH
 ENV /bin/bash -c cos_project3
 WORKDIR /srv/docker
-
-
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt

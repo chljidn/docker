@@ -64,16 +64,6 @@ class qa(viewsets.ModelViewSet):
             if instance.password != request.data['password']:
                 return Response({'message':'패스워드가 일치하지 않습니다. 패스워드를 다시 확인해 주세요.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # qna 객체가 애초에 없거나, 있어도 패스워드가 일치하는 경우.
-        # 여기서부터는 ModelViewSet의 기존 코드와 모드 일치한다.
-        # partial = kwargs.pop('partial', False)
-        # instance = self.get_object()
-        # serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        # serializer.is_valid(raise_exception=True)
-        # self.perform_update(serializer)
-        #
-        # if getattr(instance, '_prefetched_objects_cache', None):
-        #     instance._prefetched_objects_cache = {}
         super().partial_update(request, *args, **kwargs)
         return Response(status=status.HTTP_200_OK)
 

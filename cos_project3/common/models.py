@@ -100,11 +100,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         return self.username
 
-    #def is_staff(self):
-    #    "Is the user a member of staff?"
-        # Simplest possible answer: All superusers are staff
-    #    return self.is_superuser
-
     get_full_name.short_description = _('Full name')
 
 # Q&A 게시판 모델
@@ -120,14 +115,13 @@ class Qa(models.Model):
     def __str__(self):
         return self.postname
 
-# 리플 기능
 class QaReple(models.Model):
     content = models.TextField()
-    # 하나의 qna에 여러 개의 리
     qa = models.ForeignKey(Qa, on_delete=models.CASCADE, db_column='qa')
-    # 한 명의 유저가 여러 개의 리플을 남길 수 있음
-    # 유저가 탈퇴해도 리플은 삭제되지 않는다.
     repleUser = models.ForeignKey(User, on_delete=models.PROTECT, db_column='user')
     repleDate = models.DateTimeField(default=timezone.now)
     def __str__(self):
         return self.content
+
+    # class Meta:
+    #     db_table = "qa_reple"

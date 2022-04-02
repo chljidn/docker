@@ -18,8 +18,6 @@ class Cos(models.Model):
     ingredient = models.TextField(blank=True, null=True)
     prdname = models.TextField(blank=True, null=True)
     price = models.TextField(blank=True, null=True)
-    # 좋아요 기능을 위한 컬럼
-    # User 테이블과 N:M 관계를 갖는다.
     category = models.TextField(blank=True, null=True)
     like = models.ManyToManyField(User, related_name='like', blank=True)
 
