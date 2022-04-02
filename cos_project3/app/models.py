@@ -5,15 +5,11 @@ from common.models import User
 class ImageUpload(models.Model):
     title = models.CharField(max_length = 100)
     pic = models.ImageField(upload_to='imageupload') #저장 디렉터리 : media/imageupload
+    # created_at = models.DateTimeField()
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # image_size = models. ??
 
-    def __str__(self):
-        return self.title
 
-class letter(models.Model):
-    letters = models.CharField(max_length=10000)
-
-    def __str__(self):
-        return self.letters
 
 class Cos(models.Model):
     id = models.IntegerField(primary_key=True)

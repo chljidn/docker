@@ -7,12 +7,15 @@ app_name = 'common'
 
 router = DefaultRouter()
 router.register(r'qa', qa_views.qa, basename='qa')
-router.register(r'qa_reple', qa_views.qaReple, basename='qa_reple')
 
 urlpatterns = [
     path('auth/', auth_views.auth.as_view(), name='auth'),
     path('useredit/', auth_views.userEdit.as_view(), name='useredit'),
     path('refresh/', TokenRefreshView.as_view(), name='refresh'),
+
+    path('qa_reple_list/', qa_views.qa_reple_list.as_view(), name="qa_reple_list"),
+    path('qa_reple_detail/<int:pk>/', qa_views.qa_reple_detail.as_view(), name="qa_reple_detail"),
+
     path('', include(router.urls))
 ]
 

@@ -36,7 +36,8 @@ class cos_list(generics.ListAPIView):
 
 
 class cosLike(generics.CreateAPIView):
-    def create(self, request, *args, **kwargs):
+
+    def post(self, request, *args, **kwargs):
         user = User.objects.get(id=request.user.id)
         cos = Cos.objects.get(id=request.data['pk'])
         if cos.like.filter(id=request.user.id):
