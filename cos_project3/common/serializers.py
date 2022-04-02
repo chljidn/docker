@@ -20,7 +20,6 @@ class UserSerializers(serializers.ModelSerializer):
     cosreviewmodel_set = CosReviewSerializer(read_only=True, many=True)
     class Meta:
         model=User
-        # ManyToMany 필드인 like를 같이 넣는다.
         fields = ('username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set')
 
 class QaRepleSerializer(serializers.ModelSerializer):
