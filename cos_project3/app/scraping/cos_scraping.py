@@ -14,7 +14,7 @@ import json
 class scraping:
     cosmetic = cache.get_or_set('cosmetic', Cos.objects.values('prdname'))
     with open('./cos_project3_settings.json') as f:
-        secret = json.loads(f.read())
+        __secret = json.loads(f.read())
 
     def __init__(self, idx):
         self.redis3 = redis.StrictRedis(host='127.0.0.1', port=6379, db=3)  # 상세 페이지 html 가져오기 위함
@@ -51,7 +51,7 @@ class scraping:
         start_idx = self.idx  # 밑에서 enumerate 돌 때, key로 사용할 시작점으로 사용하기 위함.
 
         while True:
-            url = scraping.secret['django']['scraping'].format(self.idx)
+            url = scraping.__secret['django']['scraping'].format(self.idx)
             main_html = urllib.request.urlopen(url).read().decode('utf-8')
             link_list = self.get_links(main_html)
 
