@@ -10,21 +10,24 @@ from common.models import User
 from app.recommend import recommend
 from django.core.cache import cache
 from rest_framework import generics
-
+from app.tasks import recommend_task
 # 이미지 파일은 'media/imageupload' 디렉터리 경로로 저장
 class image_upload(generics.CreateAPIView):
-    # queryset =
     def create(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            image = ImageUpload.objects.create(
-                title=request.data['title'],
-                pic = request.data['pic']
-            )
-            recommend_object = recommend(image.pic)
-            result = recommend_object.cosine()
-            serialize = RecommendSerializer(result, many=True)
-            return Response(serialize.data, status=status.HTTP_201_CREATED)
-        return Response({"message": "회원만 가능한 기능입니다."}, status=status.HTTP_401_UNAUTHORIZED)
+        #
+        # if request.user.is_authenticated:
+        image = ImageUpload.objects.create(
+            title=request.data['title'],
+            pic = request.data['pic']
+        )
+        # recommend_object = recommend(image.pic)
+        # result = recommend_object.cosine()
+        # celery에 매개변수를 넣어 보낼 때, 그냥 image.pic를 보내면 <class 'django.db.models.fields.files.ImageFieldFile'> 타입이기 때문에
+        # celery task가 작동하지 않는다. 때문에 문자열로 변경해서 보내주어야 한다.
+        recommend_task.delay(str(image.pic))
+        # serialize = RecommendSerializer(result, many=True)
+        return Response({"message":"이미지가 업로드 되었습니다. 추천이 진행 중입니다."}, status=status.HTTP_201_CREATED)
+        # return Response({"message": "회원만 가능한 기능입니다."}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class cos_list(generics.ListAPIView):
