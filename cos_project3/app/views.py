@@ -11,6 +11,7 @@ from app.recommend import recommend
 from django.core.cache import cache
 from rest_framework import generics
 from app.tasks import recommend_task
+
 # 이미지 파일은 'media/imageupload' 디렉터리 경로로 저장
 class image_upload(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
@@ -18,7 +19,7 @@ class image_upload(generics.CreateAPIView):
         # if request.user.is_authenticated:
         image = ImageUpload.objects.create(
             title=request.data['title'],
-            pic = request.data['pic']
+            pic=request.data['pic']
         )
         # recommend_object = recommend(image.pic)
         # result = recommend_object.cosine()
@@ -38,10 +39,11 @@ class cos_list(generics.ListAPIView):
     filterset_class = CosFilter
 
 
+# redis를 활용할 수 있는 방안 찾아볼 것
+# db 접근이 너무 많음.
 class cosLike(generics.CreateAPIView):
-
     def post(self, request, *args, **kwargs):
-        user = User.objects.get(id=request.user.id)
+        user = User.objects.get(id=request.user)
         cos = Cos.objects.get(id=request.data['pk'])
         if cos.like.filter(id=request.user.id):
             cos.like.remove(user)
@@ -72,8 +74,7 @@ class cos_review(viewsets.ModelViewSet):
                 reviewCos=Cos.objects.get(id=request.data['cos_id'])
             )
             return Response(status=status.HTTP_201_CREATED)
-        else:
-            return Response({'message' : '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'message' : '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def update(self, request, *args, **kwargs):
         return Response(status=status.HTTP_501_NOT_IMPLEMENTED)

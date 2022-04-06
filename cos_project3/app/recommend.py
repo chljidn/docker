@@ -28,16 +28,14 @@ class recommend:
     def text(self):
         arg = self.link
         os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/4.00/tessdata/'
-        print('././media/' + str(arg))
         image = Image.open('././media/'+str(arg))
         x = int(1920 / image.size[0])
         y = int(1080 / image.size[1])
-        if x != 0:
-            if y != 0:
-                if x > y:
-                    image = image.resize((image.size[0] * y, image.size[1] * y))
-                else:
-                    image = image.resize((image.size[0] * x, image.size[1] * x))
+        if x != 0 and y != 0:
+            if x > y:
+                image = image.resize((image.size[0] * y, image.size[1] * y))
+            else:
+                image = image.resize((image.size[0] * x, image.size[1] * x))
 
         text = image_to_string(image, lang="kor")
         fflist = text.replace('\n', '')

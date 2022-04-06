@@ -13,13 +13,15 @@ import json
 
 class scraping:
     cosmetic = cache.get_or_set('cosmetic', Cos.objects.values('prdname'))
-    with open('./cos_project3_settings.json') as f:
-        __secret = json.loads(f.read())
+    # with open('./cos_project3_settings.json') as f:
+        # __secret = json.loads(f.read())
 
     def __init__(self, idx):
         self.redis3 = redis.StrictRedis(host='127.0.0.1', port=6379, db=3)  # 상세 페이지 html 가져오기 위함
         self.redis4 = redis.StrictRedis(host='127.0.0.1', port=6379, db=4)  # 각 상품 딕셔너리 저장하기 위함
         self.idx = idx  # 입력 받은 idx부터 시작할 수 있도록 함
+        with open('./cos_project3_settings.json') as f:
+            self.__secret = json.loads(f.read())
         lobs_html = self.lobs()
         self.preprocessing()
 
@@ -34,10 +36,6 @@ class scraping:
         return webpage_regex
 
     def detailed_page(self, url):
-        # 새 이벤트 루프 생성
-        #new_loop = asyncio.new_event_loop()
-        #asyncio.set_event_loop(new_loop)
-
         session = HTMLSession()
         r = session.get(url)
         r.html.render(scrolldown=3, timeout=40)
@@ -51,7 +49,8 @@ class scraping:
         start_idx = self.idx  # 밑에서 enumerate 돌 때, key로 사용할 시작점으로 사용하기 위함.
 
         while True:
-            url = scraping.__secret['django']['scraping'].format(self.idx)
+            # url = scraping.__secret['django']['scraping'].format(self.idx)
+            url = self.__secret['django']['scraping'].format(self.idx)
             main_html = urllib.request.urlopen(url).read().decode('utf-8')
             link_list = self.get_links(main_html)
 

@@ -16,14 +16,11 @@ services:
                 container_name: gunicorn
                 build: ./cos_project3
                 image: chljidn/recos:${TAG:-recos}
-                #restart: always
+                restart: always
                 working_dir: /srv/docker
                 command: >
                         bash -c "python manage.py makemigrations
                         && python manage.py migrate
-                        && gunicorn --bind 0.0.0.0:8000 cos.wsgi:application"
+                        && gunicorn --bind 0.0.0.0:8000 cos.wsgi:application --daemon"
                 network_mode: "host"
-                #volumes:
-                #        - ./docker:/srv/docker
-                #
               
