@@ -24,7 +24,7 @@
 
 ## 이슈 및 해결과정
 - 화장품 추천까지의 시간지연을 celery로 극복할 수 있을까?
-- 스크래핑
+- [스크래핑](https://chljidn-django.tistory.com/8)
 
 ## DB ERD
 ![](https://github.com/chljidn/docker/blob/master/cos_erd.png)
