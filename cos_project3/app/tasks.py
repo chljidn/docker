@@ -7,7 +7,7 @@ from app.scraping.cos_scraping import scraping
 
 @shared_task(name='scraping.add')
 def scraping_scheduling():
-    sc = scraping(1)
+    sc = scraping(1379)
 
 # 일단 celery를 통해 추천 리스트를 뽑는 것까지는 완성.
 # html에 렌더링하여 반환하는 부분 추가 요망.

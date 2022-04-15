@@ -12,7 +12,7 @@ class ImageUpload(models.Model):
 
 
 class Cos(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     brand = models.TextField(blank=True, null=True)
     image = models.TextField(blank=True, null=True)
     ingredient = models.TextField(blank=True, null=True)
