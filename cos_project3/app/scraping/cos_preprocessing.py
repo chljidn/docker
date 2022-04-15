@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup as bs
 from app.models import Cos
 import re
 from django.core.cache import cache
-# import multiprocessing as mp
 from multiprocessing.pool import ThreadPool
 
 redis3 = redis.StrictRedis(host='127.0.0.1', port=6379, db=3)  # 상세 페이지 html 가져오기 위함
@@ -18,7 +17,6 @@ def get_ingredient(html):
 def preprocessing(i):
     try:
         b = redis3.get(str(i))
-        # 데이터가 담기지 않은 부분을 제외하기 위함
         # 예외가 발생하거나, 아예 html이 없는 경우 캐싱된 파일이 없을 수 있으므로 이 경우는 그냥 continue로 넘어간다.
         if not b: return
 
@@ -30,10 +28,6 @@ def preprocessing(i):
         # 전성분이 없을 경우 continue
         if c == []: return
 
-        # 성분 : c[0].replace('<dd data-v-2902b98c="">', '').strip(" ")
-        # 가격 : bb.find_all('span', class_='won')[0].text.strip()
-        # 이름 : bb.find('div', class_='productName').text.strip()
-        # 브랜드 : bb.find('strong').text.strip()
         cos_dict = {
             'name': bb.find('div', class_='productName').text.strip(),
             'price': bb.find_all('span', class_='won')[0].text.strip(),
@@ -54,8 +48,6 @@ def preprocessing(i):
     except Exception as e:
         print(i, e)
 
-
-# from concurrent.futures import ProcessPoolExecutor as Pool
 # pool = mp.Pool(2)
 pool = ThreadPool(2)
 idx_list = [i for i in range(1, redis3.dbsize())]
