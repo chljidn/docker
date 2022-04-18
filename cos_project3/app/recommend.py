@@ -1,15 +1,12 @@
-# Cos 모델 설치
 from app.models import Cos
-# cache server
 from django.core.cache import cache
-# 성분추출함수에 쓰일 패키지 설치
 from PIL import Image
 from pytesseract import *
 import pandas as pd
-# 코사인 유사도에 쓰일 패키지
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import os
+from django.conf import settings
 
 class recommend:
 
@@ -86,6 +83,18 @@ class recommend:
                            'price': data2[i[1]].price,
                            'cosine': i[0]})
         return result
+
+class excel_recommend(recommend):
+    def cosine(self):
+        data = super().cosine()
+        excel_data = pd.DataFrame()
+        for i in data:
+            each_data = pd.DataFrame()
+            each_data = each_data.append({"상품이름":i["prdname"], "성분":i["ingredient"], "브랜드" : i["brand"],
+                                          "가격":i["price"], "유사도":i["cosine"]}, ignore_index=True)
+            excel_data = excel_data.append(each_data, ignore_index=True)
+        file_name = self.link.replace("imageupload/", "").replace(".png", "")
+        excel_data.to_excel(f"././media/recommend_excel/{file_name}_file.xlsx", index=False)
 
 
 

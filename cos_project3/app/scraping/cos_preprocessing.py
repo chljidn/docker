@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup as bs
 from app.models import Cos
 import re
 from django.core.cache import cache
-from multiprocessing.pool import ThreadPool
+import multiprocessing as mp
+# from multiprocessing.pool import ThreadPool
 
 redis3 = redis.StrictRedis(host='127.0.0.1', port=6379, db=3)  # 상세 페이지 html 가져오기 위함
 redis4 = redis.StrictRedis(host='127.0.0.1', port=6379, db=4)  # 각 상품 딕셔너리 저장하기 위함
@@ -48,11 +49,17 @@ def preprocessing(i):
     except Exception as e:
         print(i, e)
 
-# pool = mp.Pool(2)
-pool = ThreadPool(2)
-idx_list = [i for i in range(1, redis3.dbsize())]
-pool.map(preprocessing, idx_list)
-pool.close()
-pool.join()
+pool = mp.Pool()
+# pool = ThreadPool(2)
+# idx_list = [i for i in range(1, redis3.dbsize())]
+# pool.map(preprocessing, idx_list)
+# pool.close()
+# pool.join()
+for i in range(1, redis3.dbsize()):
+    p = mp.Process(target=preprocessing, args=(i,))
+    p.start()
+    p.join()
+
+
 
 Cos.objects.bulk_create(bulk_data)
