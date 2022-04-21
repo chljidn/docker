@@ -11,7 +11,7 @@ from app.serializers import CosReviewSerializer
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cos
-        fields = ['id', 'prdname', 'brand']
+        fields = ('id', 'prdname', 'brand')
 
 class UserSerializers(serializers.ModelSerializer):
     # like 컬럼(혹은 테이블) 안의 목록들은 다시 객체로 들어가기 때문에 그 객체들을 직렬화해주기 위함
@@ -33,11 +33,10 @@ class QaSerializers(serializers.ModelSerializer):
     # 즉 User 모델에서 def __str__ 로 설정한 필드값만 직렬화에 포함된다.
     qa_user = serializers.StringRelatedField()
     qareple_set = QaRepleSerializer(read_only=True, many=True)
-    # 내보낼 때에는 년/월/일만
     qaDate = serializers.DateTimeField(format="%Y-%m-%d")
     class Meta:
         model = Qa
-        fields = ['id', 'postname', 'content', 'qa_user', 'qaDate', 'qareple_set']
+        fields = ('id', 'postname', 'content', 'qa_user', 'qaDate', 'qareple_set')
 
     # def validate(self, attrs):
     #     data = super().validate(attrs)

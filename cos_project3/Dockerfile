@@ -14,5 +14,5 @@ ENV /bin/bash -c cos_project3
 WORKDIR /srv/docker
 
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
 

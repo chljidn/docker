@@ -7,18 +7,15 @@ from app.scraping.cos_scraping import scraping
 
 @shared_task(name='scraping.add')
 def scraping_scheduling():
-    sc = scraping(1379)
+    sc = scraping(1)
 
-# 일단 celery를 통해 추천 리스트를 뽑는 것까지는 완성.
-# html에 렌더링하여 반환하는 부분 추가 요망.
-# @app.task
-@shared_task(name='recommend_task')
-def recommend_task(image):
-    recommend_object = recommend(image)
-    result = recommend_object.cosine()
-    print(result)
+# @shared_task(name='recommend_task')
+# def recommend_task(image):
+#     recommend_object = recommend(image)
+#     result = recommend_object.cosine()
+#     print(result)
 
 @shared_task(name="excel_recommend_task")
 def excel_recommend_task(image):
-    recommend_object= excel_recommend(image)
-    result = recommend_object.cosine()
+    recommend_object=excel_recommend(image)
+    recommend_object.cosine()

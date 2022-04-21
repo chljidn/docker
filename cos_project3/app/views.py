@@ -7,40 +7,36 @@ from app.filters import CosFilter
 from app.serializers import CosSerializer, RecommendSerializer, CosReviewSerializer
 from app.models import ImageUpload, Cos, CosReviewModel
 from common.models import User
-from app.recommend import recommend, excel_recommend
+from app.recommend import recommend
 from django.core.cache import cache
 from rest_framework import generics
-from app.tasks import recommend_task, excel_recommend_task
+from app.tasks import excel_recommend_task
 
 # 이미지 파일은 'media/imageupload' 디렉터리 경로로 저장
 class image_upload(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
-        #
-        # if request.user.is_authenticated:
         image = ImageUpload.objects.create(
             title=request.data['title'],
             pic=request.data['pic']
         )
         # recommend_object = recommend(image.pic)
         # result = recommend_object.cosine()
+        # serializer = RecommendSerializer(result, many=True)
+        # return Response(serializer.data, status=status.HTTP_200_OK)
+
         # celery에 매개변수를 넣어 보낼 때, 그냥 image.pic를 보내면 <class 'django.db.models.fields.files.ImageFieldFile'> 객체 타입이기 때문에
         # celery task가 작동하지 않는다. 때문에 문자열로 변경해서 보내주어야 한다.
         excel_recommend_task.delay(str(image.pic))
-        # serialize = RecommendSerializer(result, many=True)
         return Response({"message":"이미지가 업로드 되었습니다. 추천이 진행 중입니다."}, status=status.HTTP_201_CREATED)
-        # return Response({"message": "회원만 가능한 기능입니다."}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 
 class cos_list(generics.ListAPIView):
-    permission_classes = []
     queryset = cache.get_or_set('coslist', Cos.objects.filter().distinct().order_by('id'))
     serializer_class = CosSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = CosFilter
 
-
-# redis를 활용할 수 있는 방안 찾아볼 것
-# db 접근이 너무 많음.
 class cosLike(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         user = User.objects.get(id=request.user)
@@ -48,9 +44,8 @@ class cosLike(generics.CreateAPIView):
         if cos.like.filter(id=request.user.id):
             cos.like.remove(user)
             return Response(status=status.HTTP_200_OK)
-        else:
-            cos.like.add(user)
-            return Response(status=status.HTTP_201_CREATED)
+        cos.like.add(user)
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class cos_review(viewsets.ModelViewSet):
