@@ -23,7 +23,7 @@ class image_upload(generics.CreateAPIView):
         )
         # recommend_object = recommend(image.pic)
         # result = recommend_object.cosine()
-        # celery에 매개변수를 넣어 보낼 때, 그냥 image.pic를 보내면 <class 'django.db.models.fields.files.ImageFieldFile'> 타입이기 때문에
+        # celery에 매개변수를 넣어 보낼 때, 그냥 image.pic를 보내면 <class 'django.db.models.fields.files.ImageFieldFile'> 객체 타입이기 때문에
         # celery task가 작동하지 않는다. 때문에 문자열로 변경해서 보내주어야 한다.
         excel_recommend_task.delay(str(image.pic))
         # serialize = RecommendSerializer(result, many=True)
@@ -89,4 +89,4 @@ class cos_review(viewsets.ModelViewSet):
         if request.user == self.get_object().reviewUser:
             super().destroy(request, *args, **kwargs)
             return Response(status=status.HTTP_200_OK)
-        return Response({'message' : '해당 글을 수정할 수 있는 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'message' : '해당 글을 삭제할 수 있는 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)

@@ -16,9 +16,7 @@ class scraping:
     def __init__(self, idx):
         self.redis3 = redis.StrictRedis(host='127.0.0.1', port=6379, db=3)
         self.idx = idx  # 입력 받은 idx부터 시작할 수 있도록 함
-        # with open('./cos_project3_settings.json') as f:
-        #     self.__secret = json.loads(f.read())
-        # lobs_html = self.lobs()
+        lobs_html = self.lobs()
 
     # 페이지에서 href 링크 모두 뽑아내기
     def get_links(self, html):
@@ -45,7 +43,6 @@ class scraping:
         while True:
             try:
                 url = scraping.__secret['django']['scraping'].format(self.idx)
-                # url = self.__secret['django']['scraping'].format(self.idx)
                 main_html = urllib.request.urlopen(url).read().decode('utf-8')
                 link_list = self.get_links(main_html)
 
