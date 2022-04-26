@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 from common.models import User
 
 class ImageUpload(models.Model):
@@ -7,8 +6,6 @@ class ImageUpload(models.Model):
     pic = models.ImageField(upload_to='imageupload') #저장 디렉터리 : media/imageupload
     # created_at = models.DateTimeField()
     # user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # image_size = models. ??
-
 
 
 class Cos(models.Model):
@@ -24,11 +21,18 @@ class Cos(models.Model):
     def __str__(self):
         return self.prdname
 
+
 class CosReviewModel(models.Model):
     reviewName = models.CharField(max_length=500, blank=False)
     reviewImage = models.ImageField(blank=True, upload_to='reviewImages')
     reviewContent = models.TextField(blank=True)
     reviewUser = models.ForeignKey(User, on_delete=models.PROTECT)
     reviewCos = models.ForeignKey(Cos, on_delete=models.CASCADE)
+
     def __str__(self):
         return self.reviewName
+
+class recommend_excel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # recommend_file_dir = models.FileField(upload_to="recommend_excel")
+    recommend_file_dir = models.CharField(max_length=500)

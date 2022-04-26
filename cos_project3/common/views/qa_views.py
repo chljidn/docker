@@ -32,9 +32,8 @@ class qa(viewsets.ModelViewSet):
                     serialize = self.serializer_class(qaDetail)
                     return Response(serialize.data, status=status.HTTP_200_OK)
                 return Response({"message":"패스워드가 일치하지 않습니다."}, status=status.HTTP_401_UNAUTHORIZED)
-            else:
-                serialize = self.serializer_class(qaDetail)
-                return Response(serialize.data, status=status.HTTP_200_OK)
+            serialize = self.serializer_class(qaDetail)
+            return Response(serialize.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         password = request.data.get('password', None)
@@ -44,7 +43,7 @@ class qa(viewsets.ModelViewSet):
                 postname=request.data['postname'],
                 content=request.data['content'],
                 password=password,
-                qa_user=request.user,
+                qa_user=request.user
             )
             return Response({'message':'질문글이 저장되었습니다.'}, status=status.HTTP_201_CREATED)
         return Response({'message' : '인증이 필요합니다. 먼저 로그인을 해주세요.'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -55,7 +54,6 @@ class qa(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         instance = self.get_object()
-        # 유저가 일치하는지 확인. 추후 메서드로 만들어 놓을 것.
         if request.user != instance.qa_user:
             return Response({'message': '질문을 수정할 수 있는 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -63,7 +61,6 @@ class qa(viewsets.ModelViewSet):
         if getattr(instance, 'password'):
             if instance.password != request.data['password']:
                 return Response({'message':'패스워드가 일치하지 않습니다. 패스워드를 다시 확인해 주세요.'}, status=status.HTTP_401_UNAUTHORIZED)
-
         super().partial_update(request, *args, **kwargs)
         return Response(status=status.HTTP_200_OK)
 
@@ -71,9 +68,8 @@ class qa(viewsets.ModelViewSet):
         instance = self.get_object()
         if request.user != instance.qa_user:
             return Response({'message' : '질문글을 삭제할 수 있는 권한이 없습니다. 작성자만이 질문글을 삭제할 수 있습니다.'}, status=status.HTTP_403_FORBIDDEN)
-        else:
-            self.perform_destroy(instance)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class qa_reple_list(generics.ListCreateAPIView):

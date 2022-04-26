@@ -26,9 +26,8 @@ class image_upload(generics.CreateAPIView):
 
         # celery에 매개변수를 넣어 보낼 때, 그냥 image.pic를 보내면 <class 'django.db.models.fields.files.ImageFieldFile'> 객체 타입이기 때문에
         # celery task가 작동하지 않는다. 때문에 문자열로 변경해서 보내주어야 한다.
-        excel_recommend_task.delay(str(image.pic))
+        excel_recommend_task.delay(str(image.pic), str(request.user.username))
         return Response({"message":"이미지가 업로드 되었습니다. 추천이 진행 중입니다."}, status=status.HTTP_201_CREATED)
-
 
 
 class cos_list(generics.ListAPIView):
@@ -36,6 +35,7 @@ class cos_list(generics.ListAPIView):
     serializer_class = CosSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = CosFilter
+
 
 class cosLike(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):

@@ -1,8 +1,6 @@
-# html parser api
 import urllib.request
 import re
 from requests_html import HTMLSession
-# 데이터 베이스 및 캐시
 import redis
 from django.core.cache import cache
 from app.models import Cos
@@ -45,11 +43,9 @@ class scraping:
                 url = scraping.__secret['django']['scraping'].format(self.idx)
                 main_html = urllib.request.urlopen(url).read().decode('utf-8')
                 link_list = self.get_links(main_html)
-
                 if link_list == []:
                     break
                 total_link.extend(link_list)
-
                 self.idx += 60
             except Exception as e:
                 print(e)

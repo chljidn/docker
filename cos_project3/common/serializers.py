@@ -9,9 +9,11 @@ from app.serializers import CosReviewSerializer
 # cos 모델은 common의 CosSerializer와 app의 LikeSerializer. 총 두 개의 serializer를 갖는다.
 # id와 prdname만 직력화하기 위해서 작성.
 class LikeSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Cos
         fields = ('id', 'prdname', 'brand')
+
 
 class UserSerializers(serializers.ModelSerializer):
     # like 컬럼(혹은 테이블) 안의 목록들은 다시 객체로 들어가기 때문에 그 객체들을 직렬화해주기 위함
@@ -22,11 +24,14 @@ class UserSerializers(serializers.ModelSerializer):
         model=User
         fields = ('username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set')
 
+
 class QaRepleSerializer(serializers.ModelSerializer):
     repleUser = serializers.StringRelatedField()
+
     class Meta:
         model= QaReple
         fields = '__all__'
+
 
 class QaSerializers(serializers.ModelSerializer):
     # StringRelateField로 설정하면 username만 가져온다
@@ -34,6 +39,7 @@ class QaSerializers(serializers.ModelSerializer):
     qa_user = serializers.StringRelatedField()
     qareple_set = QaRepleSerializer(read_only=True, many=True)
     qaDate = serializers.DateTimeField(format="%Y-%m-%d")
+
     class Meta:
         model = Qa
         fields = ('id', 'postname', 'content', 'qa_user', 'qaDate', 'qareple_set')
@@ -44,7 +50,9 @@ class QaSerializers(serializers.ModelSerializer):
     #     data['password'] = make_password(data['password'])
     #     return data
 
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+
     def validate(self, attrs):
         data = super().validate(attrs)
         refresh = self.get_token(self.user)

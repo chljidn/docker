@@ -7,19 +7,22 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import os
 from django.conf import settings
+from common.models import User
+from app.models import recommend_excel
 
 class recommend:
 
-    def __init__(self, link):
+    def __init__(self, link, user):
         # 업로드 된 화장품 성분 이미지 주소
         self.link = link
         self.fflist = self.text()
+        self.user = user
+        self.user_object = User.objects.get(username=self.user)
 
     def jaccard_similarity(self, doc1, doc2):
         doc1 = set(doc1)
         doc2 = set(doc2)
         return len(doc1 & doc2) / len(doc1 | doc2)
-
 
     # 이미지에서 글자 추출 후 가공
     def text(self):
@@ -85,6 +88,7 @@ class recommend:
         return result
 
 class excel_recommend(recommend):
+
     def cosine(self):
         data = super().cosine()
         excel_data = pd.DataFrame()
@@ -96,6 +100,10 @@ class excel_recommend(recommend):
         file_name = self.link.replace("imageupload/", "").replace(".png", "")
         excel_data.to_excel(f"././media/recommend_excel/{file_name}_file.xlsx", index=False)
 
+        recommend_excel.objects.create(
+            user = self.user_object,
+            recommend_file_dir= f"recommend_excel/{file_name}_file.xlsx"
+        )
 
 
 
