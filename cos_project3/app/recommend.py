@@ -61,7 +61,7 @@ class recommend:
             if len(lst) != 0:
                 lst2.append(lst[0][1])
         lst2 = ', '.join(lst2)
-        data2 = cache.get_or_set('cosine_cos', Cos.objects.all())
+        data2 = cache.get_or_set('cosine_cos', Cos.objects.all().distinct())
         ffflist = []
         # ffflist에는 각각의 코사인유사도와 상품의 인덱스 번호가 들어간다
         # ffflist = [(0.1231545, 0), (0.321516, 1) ...]와 같은 형식으로 데이터가 담긴다.
