@@ -48,9 +48,12 @@ class auth(TokenObtainPairView):
         serializer = MyTokenObtainPairSerializer(data=user_data)
         serializer.is_valid(raise_exception=True)
 
-        access = serializer.validated_data.get("access", None)
-        refresh = serializer.validated_data.get("refresh", None)
-        username = serializer.validated_data.get("username", None)
+        headers_variable = ["access", "refresh", "username"]
+        for i in headers_variable:
+            globals()[f'i'] = serializer.validated_data.get(i, None)
+        # access = serializer.validated_data.get("access", None)
+        # refresh = serializer.validated_data.get("refresh", None)
+        # username = serializer.validated_data.get("username", None)
         return Response(serializer.validated_data, status=auth_status)
         # set_cookie에 담아보내기. 현재에는 vue를 시험하기 위해 사용하지 않는다.
         # if access is not None:
@@ -70,8 +73,7 @@ class userEdit(APIView):
         if request.user.is_authenticated:
             user_serializer = UserSerializers([request.user], many=True)
             return Response(user_serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({'message' : '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'message' : '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def patch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -93,8 +95,7 @@ class userEdit(APIView):
             # 업데이트 된 경우 마이 페이지의 정보를 업로드하기 위해서 업데이트 된 정보를 다시 전송.
             user_serializer = UserSerializers(user, many=True)
             return Response(user_serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({'message' : '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'message' : '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request):
         if request.user.is_authenticated:
@@ -104,8 +105,7 @@ class userEdit(APIView):
                 return Response(status=status.HTTP_200_OK)
             else:
                 return Response({'message' : '패스워드가 일치하지 않습니다. 다시 입력해 주세요'}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            return Response({'message': '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'message': '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 # 패스워드가 탈취된 경우 refresh 토큰을 블랙리스트에 추가시켜 사용하지 못하도록 한다.
 # 형식은 refresh token을 받아서 blacklist에 추가시키는 것. refresh token은 content 부분에 담겨 보내진다.

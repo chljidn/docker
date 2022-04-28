@@ -5,12 +5,13 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from app.filters import CosFilter
 from app.serializers import CosSerializer, RecommendSerializer, CosReviewSerializer
-from app.models import ImageUpload, Cos, CosReviewModel
+from app.models import ImageUpload, Cos, CosReviewModel, recommend_excel
 from common.models import User
 from app.recommend import recommend
 from django.core.cache import cache
 from rest_framework import generics
 from app.tasks import excel_recommend_task
+from django.core.files.storage import FileSystemStorage
 
 # 이미지 파일은 'media/imageupload' 디렉터리 경로로 저장
 class image_upload(generics.CreateAPIView):
@@ -29,6 +30,14 @@ class image_upload(generics.CreateAPIView):
         excel_recommend_task.delay(str(image.pic), str(request.user.username))
         return Response({"message":"이미지가 업로드 되었습니다. 추천이 진행 중입니다."}, status=status.HTTP_201_CREATED)
 
+from django.http import FileResponse
+class recommend_file(generics.RetrieveAPIView):
+    def retrieve(self, request, pk):
+        file = FileSystemStorage("media/")
+        response_data = Response(file, content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet", status=status.HTTP_200_OK)
+        response_data = FileResponse(file.open(f"recommend_excel/{pk}.xlsx", "rb"), content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response_data['Content-Disposition'] = f'attachment; filename="recommend_file_.xlsx"'
+        return response_data
 
 class cos_list(generics.ListAPIView):
     queryset = cache.get_or_set('coslist', Cos.objects.filter().distinct().order_by('id'))

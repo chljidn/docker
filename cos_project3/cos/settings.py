@@ -74,7 +74,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.locale.LocaleMiddleware'
+    'django.middleware.locale.LocaleMiddleware',
+
 ]
 
 ROOT_URLCONF = 'cos.urls'
@@ -192,6 +193,10 @@ CSRF_COOKIE_NAME = 'XSRF-TOKEN'
 CSRF_HEADER_NAME = 'X-XSRF-TOKEN'
 # cros 정책 관련(실제 서비스 할 때에는 true X. 직접 지정 필요.)
 CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = ['http://127.0.0.1:80' ,'http://localhost:80', "http://172.30.1.44:80", 'http://127.0.0.1:8080' ,'http://localhost:8080', "http://172.30.1.44:8080"]
+# CORS_ALLOWED_ORIGINS = [
+#     'http://127.0.0.1:80' ,'http://localhost:80', "http://172.30.1.44:80", 'http://127.0.0.1:8080' ,'http://localhost:8080', "http://172.30.1.44:8080"
+# ]
 CORS_ALLOW_CREDENTIALS = True
 
 
@@ -201,16 +206,11 @@ REST_FRAMEWORK = {
     # 필터 사용에도 관련이 있지만, pk를 접미사로 붙일수 있는지 여부에도 영향을 미친다.
     # 지정하지 않을 경우, pk를 접미사로 붙이지 못하고 쿼리를 따로 써서 요청해야 한다.
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    # pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 60,
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # simplejwt
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ],
 }
 #simplejwt 설정
 SIMPLE_JWT = {

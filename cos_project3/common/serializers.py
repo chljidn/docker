@@ -2,27 +2,26 @@ from common.models import User, Qa
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.hashers import make_password
-from app.models import Cos
+from app.models import Cos, recommend_excel
 from common.models import QaReple
-from app.serializers import CosReviewSerializer
+from app.serializers import CosReviewSerializer, recommend_excel_serializer
 
 # cos 모델은 common의 CosSerializer와 app의 LikeSerializer. 총 두 개의 serializer를 갖는다.
 # id와 prdname만 직력화하기 위해서 작성.
 class LikeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Cos
         fields = ('id', 'prdname', 'brand')
 
 
 class UserSerializers(serializers.ModelSerializer):
-    # like 컬럼(혹은 테이블) 안의 목록들은 다시 객체로 들어가기 때문에 그 객체들을 직렬화해주기 위함
-    # 이렇게 따로 다시 serializer 하지 않으면 (1,13,20) 처럼 기본키인 id 값들만 뱉어내게 된다.
     like = LikeSerializer(read_only = True, many=True)
     cosreviewmodel_set = CosReviewSerializer(read_only=True, many=True)
+    recommend_excel_set = serializers.StringRelatedField(many=True)
+    # recommend_excel_set = recommend_excel_serializer(read_only=True, many=True)
     class Meta:
         model=User
-        fields = ('username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set')
+        fields = ('username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set', 'recommend_excel_set')
 
 
 class QaRepleSerializer(serializers.ModelSerializer):

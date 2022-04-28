@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from app.models import ImageUpload, Cos, CosReviewModel
+from app.models import ImageUpload, Cos, CosReviewModel, recommend_excel
 
 class ImageUploadSerializer(serializers.ModelSerializer):
     pic = serializers.ImageField(use_url=True)
@@ -26,3 +26,8 @@ class CosReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = CosReviewModel
         fields = ('id', 'reviewName', 'reviewImage', 'reviewContent', 'reviewUser', 'reviewCos')
+
+class recommend_excel_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = recommend_excel
+        fields = "__all__"

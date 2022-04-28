@@ -10,5 +10,6 @@ urlpatterns = [
     path('coslike/', app_views.cosLike.as_view(), name='coslike'),
     path("upload/", app_views.image_upload.as_view(), name="image_upload"),
     path("cos_list/", app_views.cos_list.as_view(),name="cos_list"),
+    path("recommend_excel/<str:pk>/", app_views.recommend_file().as_view(), name="recommend_excel"),
     path('', include(router.urls))
 ]
