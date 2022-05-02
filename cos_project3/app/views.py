@@ -1,6 +1,5 @@
 from rest_framework.response import Response
-from rest_framework import viewsets
-from rest_framework import status
+from rest_framework import viewsets, status, generics
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from app.filters import CosFilter
@@ -9,9 +8,10 @@ from app.models import ImageUpload, Cos, CosReviewModel, recommend_excel
 from common.models import User
 from app.recommend import recommend
 from django.core.cache import cache
-from rest_framework import generics
 from app.tasks import excel_recommend_task
 from django.core.files.storage import FileSystemStorage
+from django.http import FileResponse
+from common.decorators import login_decorator
 
 # 이미지 파일은 'media/imageupload' 디렉터리 경로로 저장
 class image_upload(generics.CreateAPIView):
@@ -20,17 +20,18 @@ class image_upload(generics.CreateAPIView):
             title=request.data['title'],
             pic=request.data['pic']
         )
-        # recommend_object = recommend(image.pic)
-        # result = recommend_object.cosine()
-        # serializer = RecommendSerializer(result, many=True)
-        # return Response(serializer.data, status=status.HTTP_200_OK)
 
-        # celery에 매개변수를 넣어 보낼 때, 그냥 image.pic를 보내면 <class 'django.db.models.fields.files.ImageFieldFile'> 객체 타입이기 때문에
-        # celery task가 작동하지 않는다. 때문에 문자열로 변경해서 보내주어야 한다.
-        excel_recommend_task.delay(str(image.pic), str(request.user.username))
-        return Response({"message":"이미지가 업로드 되었습니다. 추천이 진행 중입니다."}, status=status.HTTP_201_CREATED)
+        if request.data.get("recommend_save", None) and request.user.is_authenticated:
+            # celery에 매개변수를 넣어 보낼 때, 그냥 image.pic를 보내면 <class 'django.db.models.fields.files.ImageFieldFile'> 객체 타입이기 때문에
+            # celery task가 작동하지 않는다. 때문에 문자열로 변경해서 보내주어야 한다.
+            excel_recommend_task.delay(str(image.pic), str(request.user.username))
+            return Response({"message": "이미지가 업로드 되었습니다. 추천이 진행 중입니다."}, status=status.HTTP_201_CREATED)
 
-from django.http import FileResponse
+        recommend_object = recommend(image.pic)
+        result = recommend_object.cosine()
+        serializer = RecommendSerializer(result, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class recommend_file(generics.RetrieveAPIView):
     def retrieve(self, request, pk):
         file = FileSystemStorage("media/")
@@ -68,17 +69,16 @@ class cos_review(viewsets.ModelViewSet):
             permission_classes = []
         return [permission() for permission in permission_classes ]
 
+    # @login_decorator
     def create(self, request):
-        if request.user.is_authenticated:
-            review = CosReviewModel.objects.create(
-                reviewName=request.data['reviewName'],
-                reviewContent=request.data['reviewContent'],
-                reviewImage=request.data['reviewImage'],
-                reviewUser=request.user,
-                reviewCos=Cos.objects.get(id=request.data['cos_id'])
-            )
-            return Response(status=status.HTTP_201_CREATED)
-        return Response({'message' : '로그인이 필요한 기능입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
+        review = CosReviewModel.objects.create(
+            reviewName=request.data['reviewName'],
+            reviewContent=request.data['reviewContent'],
+            reviewImage=request.data['reviewImage'],
+            reviewUser=request.user,
+            reviewCos=Cos.objects.get(id=request.data['cos_id'])
+        )
+        return Response(status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         return Response(status=status.HTTP_501_NOT_IMPLEMENTED)

@@ -13,7 +13,9 @@ from common.filters import QaFilter
 from django.utils import timezone
 from django.core import exceptions
 from common.serializers import QaRepleSerializer
+from common.decorators import login_decorator
 
+# QNA
 class qa(viewsets.ModelViewSet):
     serializer_class = serializers.QaSerializers
     queryset = Qa.objects.all().order_by('-qaDate')
@@ -35,18 +37,17 @@ class qa(viewsets.ModelViewSet):
             serialize = self.serializer_class(qaDetail)
             return Response(serialize.data, status=status.HTTP_200_OK)
 
+    @login_decorator
     def create(self, request, *args, **kwargs):
         password = request.data.get('password', None)
         if password == '': password = None
-        if request.user.is_authenticated:
-            qa = Qa.objects.create(
-                postname=request.data['postname'],
-                content=request.data['content'],
-                password=password,
-                qa_user=request.user
-            )
-            return Response({'message':'질문글이 저장되었습니다.'}, status=status.HTTP_201_CREATED)
-        return Response({'message' : '인증이 필요합니다. 먼저 로그인을 해주세요.'}, status=status.HTTP_401_UNAUTHORIZED)
+        qa = Qa.objects.create(
+            postname=request.data['postname'],
+            content=request.data['content'],
+            password=password,
+            qa_user=request.user
+        )
+        return Response({'message':'질문글이 저장되었습니다.'}, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
@@ -71,7 +72,7 @@ class qa(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+# 리
 class qa_reple_list(generics.ListCreateAPIView):
     queryset = QaReple.objects.all()
     serializer_class = QaRepleSerializer
@@ -80,15 +81,14 @@ class qa_reple_list(generics.ListCreateAPIView):
     def get_queryset(self):
         return self.queryset.filter(repleUser=self.request.user).order_by("-repleDate")
 
+    @login_decorator
     def create(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            reple = QaReple.objects.create(
-                content=request.data['content'],
-                qa=Qa.objects.get(id=request.data['pk']),
-                repleUser=request.user
-            )
-            return Response({"message": "답글 등록이 완료되었습니다."}, status=status.HTTP_201_CREATED)
-        return Response({"message": "로그인이 필요한 기능입니다."}, status=status.HTTP_401_UNAUTHORIZED)
+        reple = QaReple.objects.create(
+            content=request.data['content'],
+            qa=Qa.objects.get(id=request.data['pk']),
+            repleUser=request.user
+        )
+        return Response({"message": "답글 등록이 완료되었습니다."}, status=status.HTTP_201_CREATED)
 
 class qa_reple_detail(mixins.DestroyModelMixin, generics.GenericAPIView):
     def delete(self, request, *args, **kwargs):
