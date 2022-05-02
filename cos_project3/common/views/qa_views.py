@@ -1,8 +1,5 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics, mixins, status
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import mixins
-from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from common.paginations import QaPagination
 from common import serializers
@@ -12,7 +9,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from common.filters import QaFilter
 from django.utils import timezone
 from django.core import exceptions
-from common.serializers import QaRepleSerializer
 from common.decorators import login_decorator
 
 # QNA

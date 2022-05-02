@@ -4,23 +4,16 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from django.http import QueryDict
 from django.contrib.auth.hashers import check_password, make_password
-
 from common.serializers import MyTokenObtainPairSerializer, UserSerializers
 from common.models import User
 
-# 회원가입 완료 이메일 보내기
-# 추후 회원가입 이메일 인증으로 변환 예정
-
 # simplejwt을 이용한 Token 발급
 # 회원가입 및 로그인
-# set_cookie를 통해서 토큰을 response set-cookie header에 담아보낸다
-# 참고 : https://stackoverflow.com/questions/66197928/django-rest-how-do-i-return-simplejwt-access-and-refresh-tokens-as-httponly-coo
 class auth(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
-        if request.data.get('email', False):
+        if request.data.get('email', None):
             user = User.objects.create_user(username=request.data['username'],
                                             email=request.data['email'],
                                             birth=request.data['birth'],
@@ -30,14 +23,14 @@ class auth(TokenObtainPairView):
             user_data = QueryDict(f'''username={request.data['username']}&password={request.data['password']}''')
             auth_status = status.HTTP_201_CREATED
 
-            # 가입 인증 메일 보내기(테스트 떄 계속 이메일 보내서 일단 기능 닫아놓)
+            # 가입 인증 메일 보내기(테스트 떄 계속 이메일 보내서 일단 기능 닫아놓음)
             # send_mail(
             #     '회원가입이 완료되었습니다',
             #     'RECOS에 회원가입이 완료되었습니다. \n 회원이 되어주신 것에 감사드립니다. 성원에 보답하겠습니다.',
             #     settings.EMAIL_HOST_USER,
             #     [request.data['email']],
             #     # fail_silently = False일 경우, 에러가 발생하면 smtplib.STMPException이 발생한다.
-            #     fail_silently=Falsㄸ음e,
+            #     fail_silently=False,
             # )
         else:
             user_data = request.data
@@ -60,6 +53,7 @@ class auth(TokenObtainPairView):
         #     response.set_cookie('refresh', refresh, httponly=True)
         #     response.set_cookie('email', username, httponly=True)
         #     return response
+
 
 # 유저 정보 읽기, 생성, 삭제(탈퇴)
 from common.decorators import login_decorator
@@ -97,12 +91,11 @@ class userEdit(APIView):
         if check_password(request.data['password'], request.user.password):
             User.delete(request.user)
             return Response(status=status.HTTP_200_OK)
-        else:
-            return Response({'message' : '패스워드가 일치하지 않습니다. 다시 입력해 주세요'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'message' : '패스워드가 일치하지 않습니다. 다시 입력해 주세요'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 # 패스워드가 탈취된 경우 refresh 토큰을 블랙리스트에 추가시켜 사용하지 못하도록 한다.
 # 형식은 refresh token을 받아서 blacklist에 추가시키는 것. refresh token은 content 부분에 담겨 보내진다.
-# 코드 출처 : https://medium.com/django-rest/logout-django-rest-framework-eb1b53ac6d35
 class blacklist(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, reuqest):
