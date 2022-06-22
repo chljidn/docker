@@ -22,10 +22,10 @@
 - Gunicorn
 - Nginx
 
-## 이슈 및 해결과정
+## 이슈 및 제작과정에 대한 고민들
 - [화장품 추천까지의 시간지연을 celery로 극복할 수 있을까?](https://chljidn-django.tistory.com/7)
 - [스크래핑](https://chljidn-django.tistory.com/8)
-- JWT 직접 만들기
+- 회원 인증(session, jwt)
 
 ## DB ERD
 ![](https://github.com/chljidn/docker/blob/master/cos_erd.png)
