@@ -13,8 +13,8 @@ class user_serializer_test(APITestCase):
         user = User.objects.get(username="test_serializer")
         serializer = UserSerializers(user)
         data = serializer.data
-        # username, email, birth, sex, like(related), cosreviewmodel_set(related) => 6
-        self.assertEqual(len(data), 6)
+        # username, email, birth, sex, like(related), cosreviewmodel_set(related), recommend_excel_set => 7
+        self.assertEqual(len(data), 7)
 
         user = User.objects.all()
         serializer = UserSerializers(user, many=True)

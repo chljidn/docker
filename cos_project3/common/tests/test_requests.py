@@ -70,12 +70,13 @@ class qa_request_tests(APITestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='qa_test', password='qatestpasswd', email='test@test.com', birth='2021-09-09', sex='M')
-        # 패스워드 없 글 셋업
-        self.qa1 = Qa.objects.create(postname='setup1', content='setup1', qa_user=self.user)
-        self.url1 = reverse('common:qa-qa-detail', kwargs={'pk': self.qa1.id})
+        # 패스워드 없는 글 셋업
+        self.qa1 = Qa.objects.create(id=1, postname='setup1', content='setup1', qa_user=self.user)
+        self.url1 = reverse('common:qa-detail', kwargs={'pk': self.qa1.id})
         # 패스워드 있는 글 셋업
-        self.qa2 = Qa.objects.create(postname='setup2', content='setup2', password='setup2', qa_user=self.user)
-        self.url2 = reverse('common:qa-qa-detail', kwargs={'pk': self.qa2.id})
+        self.qa2 = Qa.objects.create(id=2, postname='setup2', content='setup2', password='setup2', qa_user=self.user)
+        self.url2 = reverse('common:qa-detail', kwargs={'pk': self.qa2.id})
+
         # qna 생성 요청에 사용할 APIClient 유저 객체에 토큰 담기
         response = self.client.post(self.auth_url, {'username': 'qa_test', 'password': 'qatestpasswd'}, format='json')
         self.apiclient = APIClient()
@@ -106,8 +107,9 @@ class qa_request_tests(APITestCase):
         # 패스워드가 없는 글은 get으로 가져오기
         response = self.client.get(self.url1)
         self.assertEqual(response.status_code, 200)
-        # 패스워드가 있는 글은 post로 가져오기
-        response = self.client.post(self.url2, {'password': 'setup2'}, format='json')
+
+        response = self.client.get(self.url2, {'password':'setup2'}, format='json')
+        print(response)
         self.assertEqual(response.status_code, 200)
 
     # qna 상세 페이지 읽기 에러(패스워드가 있는 게시물에 get 요청으로 패스워드를 보내지 않은 경우, 패스워드가 있는 게시물에 post 요청으로 보낸 패스워드가 틀린 경우)
@@ -116,7 +118,7 @@ class qa_request_tests(APITestCase):
         response = self.client.get(self.url2)
         self.assertEqual(response.status_code, 401)
         # 패스워드가 있는 게시글의 경우, 패스워드가 틀렸을 경우 에러 발생
-        response = self.client.post(self.url2, {'password':'setup1'}, format='json')
+        response = self.client.get(self.url2, {'password':'setup1'}, format='json')
         self.assertEqual(response.status_code, 401)
 
     # qna 상세 페이지 수정.
@@ -133,6 +135,7 @@ class qa_request_tests(APITestCase):
         # 패스워드가 틀렸을 경우
         response = self.apiclient.patch(f'{self.qa_url}{self.qa2.id}/', {'content' : 'setup2 수정', 'password': 'setup1'}, format='json')
         self.assertEqual(response.status_code, 401)
+
         # 유저가 일치하지 않을 경우
 
     def test_qa_detail_delete(self):

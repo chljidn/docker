@@ -8,7 +8,7 @@ from django.urls import reverse
 # 이 셋팅을 통해서 테스트 db를 생성하지 않고, 기존의 db에서 테스트를 진행한다.
 # 실행은 python manage.py test app.tests.test_app_requests.cos_request_tests --settings='app.tests.settings_test 를 통해서 app의 테스트는 따로 진행하도록 했다.
 class cos_request_tests(APITestCase):
-    url = reverse('app:cos_list-list')
+    url = reverse('app:cos_list')
     # 전체 화장품 데이터 가져오기
     def test_cos_list_get(self):
         response = self.client.get(self.url)

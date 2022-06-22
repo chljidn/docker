@@ -8,7 +8,9 @@ from common.models import User
 def login_decorator(func):
     def wrapper(self, request, *args, **kwargs):
         try:
-            token = request.headers.get("Authorization", None).replace("Bearer ", "")
+            token = request.headers.get("Authorization", None)
+            if token:
+                token = token.replace("Bearer ", "")
             info = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
 
             # expire = datetime.utcfromtimestamp(info['exp'])

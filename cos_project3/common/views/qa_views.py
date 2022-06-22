@@ -48,6 +48,7 @@ class qa(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
 
+    @login_decorator
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         instance = self.get_object()
@@ -71,7 +72,7 @@ class qa(viewsets.ModelViewSet):
 # 리
 class qa_reple_list(generics.ListCreateAPIView):
     queryset = QaReple.objects.all()
-    serializer_class = QaRepleSerializer
+    serializer_class = serializers.QaRepleSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
