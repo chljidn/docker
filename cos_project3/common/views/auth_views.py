@@ -1,17 +1,14 @@
-from rest_framework import status, exceptions as rest_excptions
+from rest_framework import status, generics, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.http import QueryDict
 from django.contrib.auth.hashers import check_password, make_password
 from common.serializers import MyTokenObtainPairSerializer, UserSerializers
 from common.models import User
 from django.utils.datastructures import MultiValueDictKeyError
 from common.functions import jwt_set_cookie
-from rest_framework import serializers
 
 # 회원가입
 class SignUp(generics.CreateAPIView):
@@ -30,6 +27,8 @@ class SignUp(generics.CreateAPIView):
             signup_status = status.HTTP_400_BAD_REQUEST
         finally:
             return Response(message, status=signup_status)
+
+
 # 로그인
 class Login(TokenObtainPairView):
     def post(self, request):
@@ -46,7 +45,8 @@ class Login(TokenObtainPairView):
         except serializers.ValidationError:
             return Response({"message" : "인증정보가 정확하지 않습니다. 아이디와 비밀번호를 다시 확인해주세요"}, status=status.HTTP_400_BAD_REQUEST)
 
-# 유저 정보 읽기, 생성, 삭제(탈퇴)
+
+# 마이 페이지(유저 정보 조회/수정, 회원 탈퇴)
 from common.decorators import login_decorator
 class userEdit(APIView):
     # 유저가 인증되어 있으면 request.user에 유저 객체가 이미 들어있으므로 직렬화만 해서 리턴한다.
@@ -87,15 +87,15 @@ class userEdit(APIView):
 
 # 패스워드가 탈취된 경우 refresh 토큰을 블랙리스트에 추가시켜 사용하지 못하도록 한다.
 # 형식은 refresh token을 받아서 blacklist에 추가시키는 것. refresh token은 content 부분에 담겨 보내진다.
-class blacklist(APIView):
-    permission_classes = [IsAuthenticated]
-    def post(self, reuqest):
-        try:
-            refresh_token = reuqest.data['refresh']
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            return Response(status=status.HTTP_205_RESET_CONTENT)
-        except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+# class blacklist(APIView):
+#     permission_classes = [IsAuthenticated]
+#     def post(self, reuqest):
+#         try:
+#             refresh_token = reuqest.data['refresh']
+#             token = RefreshToken(refresh_token)
+#             token.blacklist()
+#             return Response(status=status.HTTP_205_RESET_CONTENT)
+#         except Exception as e:
+#             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
