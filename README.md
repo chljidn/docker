@@ -10,6 +10,8 @@
 - app : 화장품 데이터 스크래핑 및 업로드, 화장품 성분 이미지업로드, 화장품 추천, 화장품 리뷰, 좋아요 기능
 - common : 로그인/로그아웃, 회원가입/탈퇴, 내 정보 수정, Q&A
 
+## [사용자 기능 및 관련 링크](https://github.com/chljidn/docker/wiki)
+
 ## 기술 스택
 - python 3.8
 - MariaDB
