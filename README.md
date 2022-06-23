@@ -11,6 +11,8 @@
 - common : 로그인/로그아웃, 회원가입/탈퇴, 내 정보 수정, Q&A
 
 ## [사용자 기능 및 관련 링크](https://github.com/chljidn/docker/wiki)
+- 사용자 기능에 관한 목록은 'wiki'에 작성되어 있습니다.
+- 
 
 ## 기술 스택
 - python 3.8
