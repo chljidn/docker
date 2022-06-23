@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime
 from common.models import User
+from rest_framework import exceptions as rest_exceptions
 
 def login_decorator(func):
     def wrapper(self, request, *args, **kwargs):
@@ -11,15 +12,12 @@ def login_decorator(func):
             token = request.headers.get("Authorization", None)
             if token:
                 token = token.replace("Bearer ", "")
+            else:
+                raise rest_exceptions.NotAuthenticated
             info = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
-
-            # expire = datetime.utcfromtimestamp(info['exp'])
-            # if settings.USE_TZ and expire <= datetime.utcnow():
-            #     return Response({"토큰의 유효기간이 만료되었습니다. 다시 인증해주세요."}, status=status.HTTP_401_UNAUTHORIZED)
-
-            # request.user = settings.AUTH_USER_MODEL.objects.get(id=info['user_id'])
-
             request.user = User.objects.get(id=info['user_id'])
+        except rest_exceptions.NotAuthenticated:
+            return Response({"message": "로그인이 필요합니다."}, status=status.HTTP_401_UNAUTHORIZED)
         except jwt.exceptions.DecodeError:
             return Response({"message": "토큰이 유효하지 않습니다."}, status=status.HTTP_401_UNAUTHORIZED)
         except jwt.exceptions.ExpiredSignatureError:

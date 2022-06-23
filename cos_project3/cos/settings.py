@@ -147,37 +147,37 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # log
-LOGGING_CONFIG = 'logging.config.dictConfig'
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format':"[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt': "%d/%b/%y %H:%M:%S"
-        },
-    },
-
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'cos_project3.log'),
-            'formatter': 'verbose'
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-        },
-        'cos_project3': {
-            'handlers': ['file'],
-            'level': 'DEBUG'
-        },
-
-    },
-}
+# LOGGING_CONFIG = 'logging.config.dictConfig'
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'formatters': {
+#         'verbose': {
+#             'format':"[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+#             'datefmt': "%d/%b/%y %H:%M:%S"
+#         },
+#     },
+#
+#     'handlers': {
+#         'file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.FileHandler',
+#             'filename': os.path.join(BASE_DIR, 'logs', 'cos_project3.log'),
+#             'formatter': 'verbose'
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': 'DEBUG',
+#         },
+#         'cos_project3': {
+#             'handlers': ['file'],
+#             'level': 'DEBUG'
+#         },
+#
+#     },
+# }
 
 # celery
 CELERY_BROKER_URL= 'redis://127.0.0.1:6379/0'

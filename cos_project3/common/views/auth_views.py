@@ -1,6 +1,7 @@
-from rest_framework import status
+from rest_framework import status, exceptions as rest_excptions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,52 +9,42 @@ from django.http import QueryDict
 from django.contrib.auth.hashers import check_password, make_password
 from common.serializers import MyTokenObtainPairSerializer, UserSerializers
 from common.models import User
+from django.utils.datastructures import MultiValueDictKeyError
+from common.functions import jwt_set_cookie
+from rest_framework import serializers
 
-# simplejwt을 이용한 Token 발급
-# 회원가입 및 로그인
-class auth(TokenObtainPairView):
-    def post(self, request, *args, **kwargs):
-        if request.data.get('email', None):
+# 회원가입
+class SignUp(generics.CreateAPIView):
+    def create(self, request, *args, **kwargs):
+        try:
             user = User.objects.create_user(username=request.data['username'],
                                             email=request.data['email'],
                                             birth=request.data['birth'],
                                             sex=request.data['sex'],
                                             password=request.data['password'],
-                                       )
-            user_data = QueryDict(f'''username={request.data['username']}&password={request.data['password']}''')
-            auth_status = status.HTTP_201_CREATED
-
-            # 가입 인증 메일 보내기(테스트 떄 계속 이메일 보내서 일단 기능 닫아놓음)
-            # send_mail(
-            #     '회원가입이 완료되었습니다',
-            #     'RECOS에 회원가입이 완료되었습니다. \n 회원이 되어주신 것에 감사드립니다. 성원에 보답하겠습니다.',
-            #     settings.EMAIL_HOST_USER,
-            #     [request.data['email']],
-            #     # fail_silently = False일 경우, 에러가 발생하면 smtplib.STMPException이 발생한다.
-            #     fail_silently=False,
-            # )
-        else:
+                                            )
+            message = {"message" : "회원가입이 완료되었습니다."}
+            signup_status = status.HTTP_201_CREATED
+        except MultiValueDictKeyError:
+            message = {"message": "회원가입에 실패했습니다. 회원정보를 정확히 입력하세요."}
+            signup_status = status.HTTP_400_BAD_REQUEST
+        finally:
+            return Response(message, status=signup_status)
+# 로그인
+class Login(TokenObtainPairView):
+    def post(self, request):
+        try:
             user_data = request.data
-            auth_status = status.HTTP_200_OK
+            serializer = MyTokenObtainPairSerializer(data=user_data)
+            serializer.is_valid(raise_exception=True)
+            response = jwt_set_cookie(serializer)
+            response.status = status.HTTP_200_OK
+            return response
 
-        serializer = MyTokenObtainPairSerializer(data=user_data)
-        serializer.is_valid(raise_exception=True)
-
-        headers_variable = ["access", "refresh", "username"]
-        for i in headers_variable:
-            globals()[f'i'] = serializer.validated_data.get(i, None)
-        # access = serializer.validated_data.get("access", None)
-        # refresh = serializer.validated_data.get("refresh", None)
-        # username = serializer.validated_data.get("username", None)
-        return Response(serializer.validated_data, status=auth_status)
-        # set_cookie에 담아보내기. 현재에는 vue를 시험하기 위해 사용하지 않는다.
-        # if access is not None:
-        #     response = Response({}, status=200)
-        #     response.set_cookie('token', access, httponly=True)
-        #     response.set_cookie('refresh', refresh, httponly=True)
-        #     response.set_cookie('email', username, httponly=True)
-        #     return response
-
+        # 아이디나 비밀번호가 잘못될 경우 is_valid 부분에서 에러 발생 가능.
+        # non_field_errors 에러 발생
+        except serializers.ValidationError:
+            return Response({"message" : "인증정보가 정확하지 않습니다. 아이디와 비밀번호를 다시 확인해주세요"}, status=status.HTTP_400_BAD_REQUEST)
 
 # 유저 정보 읽기, 생성, 삭제(탈퇴)
 from common.decorators import login_decorator
