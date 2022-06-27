@@ -38,7 +38,6 @@ class LoginView(TokenObtainPairView):
             serializer = MyTokenObtainPairSerializer(data=user_data)
             serializer.is_valid(raise_exception=True)
             response = jwt_set_cookie(serializer)
-            response.status = status.HTTP_200_OK
             return response
 
         # 아이디나 비밀번호가 잘못될 경우 is_valid 부분에서 에러 발생 가능.
@@ -48,16 +47,18 @@ class LoginView(TokenObtainPairView):
 
 
 # Refresh view
-# 기존에 data에 refres token을 담아서 보내던 것을 headers에 담아서 보내도록 수정.
+# 기존에 data에 refres token을 담아서 보내던 것을 headers에 담아서 받고, 보내도록 수정.
 class MyTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.headers)
         try:
             serializer.is_valid(raise_exception=True)
+            response = jwt_set_cookie(serializer)
+
         except TokenError as e:
             raise InvalidToken(e.args[0])
 
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return response
 
 # 마이 페이지(유저 정보 조회/수정, 회원 탈퇴)
 from common.decorators import login_decorator
