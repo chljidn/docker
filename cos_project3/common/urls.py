@@ -9,11 +9,10 @@ router = DefaultRouter()
 router.register(r'qa', qa_views.qa, basename='qa')
 
 urlpatterns = [
-    path('auth/', auth_views.auth.as_view(), name='auth'),
-    path('signup/', auth_views.SignUp.as_view(), name='signup'),
-    path('login/', auth_views.Login.as_view(), name='login'),
+    path('signup/', auth_views.SignupView.as_view(), name='signup'),
+    path('login/', auth_views.LoginView.as_view(), name='login'),
     path('useredit/', auth_views.userEdit.as_view(), name='useredit'),
-    path('refresh/', TokenRefreshView.as_view(), name='refresh'),
+    path('refresh/', auth_views.MyTokenRefreshView.as_view(), name='refresh'),
     path('qa_reple_list/', qa_views.qa_reple_list.as_view(), name="qa_reple_list"),
     path('qa_reple_detail/<int:pk>/', qa_views.qa_reple_detail.as_view(), name="qa_reple_detail"),
     path('', include(router.urls))

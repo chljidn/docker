@@ -2,16 +2,17 @@ from rest_framework import status, generics, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password, make_password
 from common.serializers import MyTokenObtainPairSerializer, UserSerializers
 from common.models import User
 from django.utils.datastructures import MultiValueDictKeyError
 from common.functions import jwt_set_cookie
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 # 회원가입
-class SignUp(generics.CreateAPIView):
+class SignupView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         try:
             user = User.objects.create_user(username=request.data['username'],
@@ -30,7 +31,7 @@ class SignUp(generics.CreateAPIView):
 
 
 # 로그인
-class Login(TokenObtainPairView):
+class LoginView(TokenObtainPairView):
     def post(self, request):
         try:
             user_data = request.data
@@ -45,6 +46,18 @@ class Login(TokenObtainPairView):
         except serializers.ValidationError:
             return Response({"message" : "인증정보가 정확하지 않습니다. 아이디와 비밀번호를 다시 확인해주세요"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+# Refresh view
+# 기존에 data에 refres token을 담아서 보내던 것을 headers에 담아서 보내도록 수정.
+class MyTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.headers)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 # 마이 페이지(유저 정보 조회/수정, 회원 탈퇴)
 from common.decorators import login_decorator
