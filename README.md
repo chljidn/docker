@@ -33,7 +33,7 @@
 ## 이슈 및 제작과정에 대한 고민들
 - [화장품 추천까지의 시간지연을 celery로 극복할 수 있을까?](https://chljidn-django.tistory.com/7)
 - [스크래핑](https://chljidn-django.tistory.com/8)
-- 회원 인증(session, jwt)
+- [회원 인증(session, jwt)](https://chljidn-django.tistory.com/9)
  <br><br>
  
 ## DB ERD
