@@ -4,10 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from common.paginations import QaPagination
 from common import serializers
 from common.models import Qa, QaReple
-from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 from common.filters import QaFilter
-from django.utils import timezone
 from django.core import exceptions
 from common.decorators import login_decorator
 
@@ -69,7 +67,7 @@ class qa(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# 리
+
 class qa_reple_list(generics.ListCreateAPIView):
     queryset = QaReple.objects.all()
     serializer_class = serializers.QaRepleSerializer
