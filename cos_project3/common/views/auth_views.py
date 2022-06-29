@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework import generics, mixins
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib.auth.hashers import check_password, make_password
-from common.serializers import MyTokenObtainPairSerializer, UserSerializers
+from common.serializers import MyTokenObtainPairSerializer, UserSerializer, SignUpSerializer
 from common.models import User
 from django.utils.datastructures import MultiValueDictKeyError
 from common.functions import jwt_set_cookie
@@ -13,14 +13,13 @@ from common.decorators import login_decorator
 
 # 회원가입
 class SignupView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = SignUpSerializer
     def create(self, request, *args, **kwargs):
         try:
-            user = User.objects.create_user(username=request.data['username'],
-                                            email=request.data['email'],
-                                            birth=request.data['birth'],
-                                            sex=request.data['sex'],
-                                            password=request.data['password'],
-                                            )
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
             message = {"message" : "회원가입이 완료되었습니다."}
             signup_status = status.HTTP_201_CREATED
         except MultiValueDictKeyError:
@@ -60,7 +59,7 @@ class MyTokenRefreshView(TokenRefreshView):
 
 class MyInfoView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializers
+    serializer_class = UserSerializer
     @login_decorator
     def retrieve(self, request, *args, **kwargs):
         response = super().retrieve(request, *args, **kwargs)

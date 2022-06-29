@@ -14,14 +14,24 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ('id', 'prdname', 'brand')
 
 
-class UserSerializers(serializers.ModelSerializer):
+class SignUpSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+
+    class Meta:
+        model=User
+        fields = ('username', 'sex', 'birth', 'email', 'password')
+
+class UserSerializer(serializers.ModelSerializer):
     like = LikeSerializer(read_only = True, many=True)
     cosreviewmodel_set = CosReviewSerializer(read_only=True, many=True)
     recommend_excel_set = serializers.StringRelatedField(many=True)
     # recommend_excel_set = recommend_excel_serializer(read_only=True, many=True)
+
     class Meta:
         model=User
         fields = ('username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set', 'recommend_excel_set')
+
 
 
 class QaRepleSerializer(serializers.ModelSerializer):
