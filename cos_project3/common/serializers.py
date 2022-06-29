@@ -1,3 +1,5 @@
+import rest_framework.exceptions
+
 from common.models import User, Qa
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -17,6 +19,7 @@ class LikeSerializer(serializers.ModelSerializer):
 class SignUpSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
+
 
     class Meta:
         model=User

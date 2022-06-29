@@ -1,7 +1,6 @@
-from rest_framework import status, generics, serializers
+from rest_framework import status, serializers, generics, mixins
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import generics, mixins
+import rest_framework.exceptions
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib.auth.hashers import check_password, make_password
 from common.serializers import MyTokenObtainPairSerializer, UserSerializer, SignUpSerializer
@@ -19,12 +18,15 @@ class SignupView(generics.CreateAPIView):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
+            user = self.perform_create(serializer)
             message = {"message" : "회원가입이 완료되었습니다."}
             signup_status = status.HTTP_201_CREATED
         except MultiValueDictKeyError:
             message = {"message": "회원가입에 실패했습니다. 회원정보를 정확히 입력하세요."}
             signup_status = status.HTTP_400_BAD_REQUEST
+        except rest_framework.exceptions.ValidationError as e:
+            message = {"message": e.detail}
+            signup_status = status.HTTP_409_CONFLICT
         finally:
             return Response(message, status=signup_status)
 
