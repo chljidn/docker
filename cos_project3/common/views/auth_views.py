@@ -9,7 +9,7 @@ from common.models import User
 from django.utils.datastructures import MultiValueDictKeyError
 from common.functions import jwt_set_cookie
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from common.decorators import login_decorator
+from common.decorators import login_decorator, update_decorator
 
 # 회원가입
 class SignupView(generics.CreateAPIView):
@@ -57,12 +57,20 @@ class MyTokenRefreshView(TokenRefreshView):
 
         return response
 
+# 내 정보(조회, 수정, 삭제)
 class MyInfoView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     @login_decorator
     def retrieve(self, request, *args, **kwargs):
         response = super().retrieve(request, *args, **kwargs)
+        return response
+
+    # patch 일 경우에만 update 기능을 사용할 수 있도록 update_decorator을 통해서 partial이 없는 경우, update 기능 사용할 수 없도록 함.
+    @login_decorator
+    @update_decorator
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
         return response
 
     # 패스워드가 ''로 들어오는 경우는 따로 고려하지 않는다.
