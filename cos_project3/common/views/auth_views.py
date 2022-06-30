@@ -5,26 +5,30 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib.auth.hashers import check_password, make_password
 from common.serializers import MyTokenObtainPairSerializer, UserSerializer, SignUpSerializer
 from common.models import User
+from django.contrib.auth import get_user_model
 from django.utils.datastructures import MultiValueDictKeyError
 from common.functions import jwt_set_cookie
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from common.decorators import login_decorator, update_decorator
 
+
 # 회원가입
 class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = SignUpSerializer
+
     def create(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            user = self.perform_create(serializer)
+            self.perform_create(serializer)
             message = {"message" : "회원가입이 완료되었습니다."}
             signup_status = status.HTTP_201_CREATED
         except MultiValueDictKeyError:
             message = {"message": "회원가입에 실패했습니다. 회원정보를 정확히 입력하세요."}
             signup_status = status.HTTP_400_BAD_REQUEST
         except rest_framework.exceptions.ValidationError as e:
+            print(e)
             message = {"message": e.detail}
             signup_status = status.HTTP_409_CONFLICT
         finally:
