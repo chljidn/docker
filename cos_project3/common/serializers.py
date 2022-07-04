@@ -1,5 +1,4 @@
 import rest_framework.exceptions
-
 from common.models import User, Qa
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -17,13 +16,14 @@ class LikeSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-    def perform_create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+    def save(self):
+        user = User.objects.create_user(**self.validated_data)
         return user
 
     class Meta:
         model=User
         fields = ('username', 'sex', 'birth', 'email', 'password')
+
 
 class UserSerializer(serializers.ModelSerializer):
     like = LikeSerializer(read_only = True, many=True)
@@ -34,7 +34,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model=User
         fields = ('username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set', 'recommend_excel_set')
-
 
 
 class QaRepleSerializer(serializers.ModelSerializer):
