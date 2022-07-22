@@ -36,5 +36,8 @@
 - [회원 인증(session, jwt)](https://chljidn-django.tistory.com/9)
  <br><br>
  
+## 애플리케이션 실행 영상(영상을 클릭하시면 더 크게 보실 수 있습니다.)
+- <img src="https://github.com/chljidn/docker/blob/master/signup_login.gif" width="500px" height="300px">
+
 ## DB ERD
 ![](https://github.com/chljidn/docker/blob/master/cos_erd.png)
