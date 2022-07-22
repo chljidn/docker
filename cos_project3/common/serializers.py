@@ -33,7 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=User
-        fields = ('username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set', 'recommend_excel_set')
+        fields = ('id','username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set', 'recommend_excel_set')
 
 
 class QaRepleSerializer(serializers.ModelSerializer):
@@ -69,5 +69,5 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         refresh = self.get_token(self.user)
         data['refresh'] = str(refresh)
         data['access'] = str(refresh.access_token)
-        data['username'] = self.user.username
+        data['id'] = self.user.id
         return data

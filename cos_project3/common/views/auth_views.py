@@ -39,7 +39,11 @@ class LoginView(TokenObtainPairView):
             user_data = request.data
             serializer = MyTokenObtainPairSerializer(data=user_data)
             serializer.is_valid(raise_exception=True)
-            response = jwt_set_cookie(serializer)
+            # response = jwt_set_cookie(serializer)
+            access = serializer.validated_data.get("access", None)
+            refresh = serializer.validated_data.get("refresh", None)
+            data = {"access" : access, "refresh" : refresh, "id": serializer.user.id}
+            response = Response(data, status=status.HTTP_200_OK)
             return response
 
         # 아이디나 비밀번호가 잘못될 경우 is_valid 부분에서 에러 발생 가능.
@@ -67,7 +71,10 @@ class MyInfoView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     @login_decorator
     def retrieve(self, request, *args, **kwargs):
-        response = super().retrieve(request, *args, **kwargs)
+        try:
+            response = super().retrieve(request, *args, **kwargs)
+        except Exception as e:
+            print(e)
         return response
 
     # patch 일 경우에만 update 기능을 사용할 수 있도록 update_decorator을 통해서 partial이 없는 경우, update 기능 사용할 수 없도록 함.
