@@ -28,7 +28,7 @@ class recommend:
     def text(self):
         arg = self.link
         os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/4.00/tessdata/'
-        image = Image.open('././media/'+str(arg))
+        image = Image.open(f'././media/{str(arg)}')
         x = int(1920 / image.size[0])
         y = int(1080 / image.size[1])
         if x != 0 and y != 0:

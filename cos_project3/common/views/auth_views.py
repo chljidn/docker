@@ -66,15 +66,22 @@ class MyTokenRefreshView(TokenRefreshView):
         return response
 
 # 내 정보(조회, 수정, 삭제)
+# 수정 요
 class MyInfoView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     @login_decorator
     def retrieve(self, request, *args, **kwargs):
+        print(kwargs)
+        test_user = User.objects.get(id=kwargs["pk"])
         try:
-            response = super().retrieve(request, *args, **kwargs)
+            if request.user == test_user:
+                response = super().retrieve(request, *args, **kwargs)
+            else:
+                response = Response({"message":"user not matching"})
         except Exception as e:
-            print(e)
+            # print(e)
+            response = Response({"message": e})
         return response
 
     # patch 일 경우에만 update 기능을 사용할 수 있도록 update_decorator을 통해서 partial이 없는 경우, update 기능 사용할 수 없도록 함.
