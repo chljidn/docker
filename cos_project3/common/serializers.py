@@ -38,7 +38,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 class QaRepleSerializer(serializers.ModelSerializer):
     repleUser = serializers.StringRelatedField()
-
     class Meta:
         model= QaReple
         fields = '__all__'

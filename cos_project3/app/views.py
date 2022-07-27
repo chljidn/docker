@@ -52,13 +52,13 @@ class cos_list(generics.ListAPIView):
 
 
 class cosLike(generics.CreateAPIView):
+    @login_decorator
     def post(self, request, *args, **kwargs):
-        user = User.objects.get(id=request.user)
         cos = Cos.objects.get(id=request.data['pk'])
         if cos.like.filter(id=request.user.id):
-            cos.like.remove(user)
+            cos.like.remove(request.user)
             return Response(status=status.HTTP_200_OK)
-        cos.like.add(user)
+        cos.like.add(request.user)
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -73,7 +73,7 @@ class cos_review(viewsets.ModelViewSet):
             permission_classes = []
         return [permission() for permission in permission_classes ]
 
-    # @login_decorator
+    @login_decorator
     def create(self, request):
         review = CosReviewModel.objects.create(
             reviewName=request.data['reviewName'],

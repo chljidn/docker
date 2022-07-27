@@ -7,10 +7,18 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         model = ImageUpload
         fields = ('title','pic')
 
+class CosReviewSerializer(serializers.ModelSerializer):
+    reviewCos = serializers.StringRelatedField()
+    reviewUser = serializers.StringRelatedField()
+    class Meta:
+        model = CosReviewModel
+        fields = ('id', 'reviewName', 'reviewImage', 'reviewContent', 'reviewUser', 'reviewCos')
+
 class CosSerializer(serializers.ModelSerializer):
+    cosreviewmodel_set = CosReviewSerializer(read_only=True, many=True)
     class Meta:
         model = Cos
-        fields = '__all__'
+        fields = ('id', 'brand', 'image', 'ingredient', 'prdname', 'price', 'category', 'like', 'cosreviewmodel_set')
 
 class RecommendSerializer(serializers.Serializer):
     prdname = serializers.CharField()
@@ -19,13 +27,6 @@ class RecommendSerializer(serializers.Serializer):
     brand = serializers.CharField()
     price = serializers.CharField()
     cosine = serializers.FloatField()
-
-class CosReviewSerializer(serializers.ModelSerializer):
-    reviewCos = serializers.StringRelatedField()
-    reviewUser = serializers.StringRelatedField()
-    class Meta:
-        model = CosReviewModel
-        fields = ('id', 'reviewName', 'reviewImage', 'reviewContent', 'reviewUser', 'reviewCos')
 
 class recommend_excel_serializer(serializers.ModelSerializer):
     class Meta:
