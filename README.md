@@ -39,8 +39,12 @@
 ## 애플리케이션 실행 영상(영상을 클릭하시면 더 크게 보실 수 있습니다.)
 ### 영상작업은 현재 진행 중입니다. 각 기능에 대한 영상은 추후 차례대로 업로드 될 예정입니다.
 - 회원가입 및 로그인
+<img src="https://github.com/chljidn/docker/blob/master/signup_login.gif" width="300px" height="200px" >
 
-<img src="https://github.com/chljidn/docker/blob/master/signup_login.gif" width="500px" height="300px">
+- 화장품 리스트
+<img src="https://github.com/chljidn/docker/blob/master/cosmetic_list_detail.gif" width="300px" height="200px">
 
+- 좋아요 기능
+<img src="https://github.com/chljidn/docker/blob/master/like_app.gif" width="300px" height="200px">
 ## DB ERD
 ![](https://github.com/chljidn/docker/blob/master/cos_erd.png)
