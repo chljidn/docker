@@ -46,5 +46,6 @@
 
 - 좋아요 기능
 <img src="https://github.com/chljidn/docker/blob/master/like_app.gif" width="300px" height="200px">
+
 ## DB ERD
 ![](https://github.com/chljidn/docker/blob/master/cos_erd.png)
