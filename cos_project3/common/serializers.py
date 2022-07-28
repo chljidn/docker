@@ -19,21 +19,25 @@ class SignUpSerializer(serializers.ModelSerializer):
     def save(self):
         user = User.objects.create_user(**self.validated_data)
         return user
-
     class Meta:
         model=User
         fields = ('username', 'sex', 'birth', 'email', 'password')
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
     like = LikeSerializer(read_only = True, many=True)
     cosreviewmodel_set = CosReviewSerializer(read_only=True, many=True)
     recommend_excel_set = serializers.StringRelatedField(many=True)
-    # recommend_excel_set = recommend_excel_serializer(read_only=True, many=True)
+
+    def update(self, instance, validated_data):
+        if validated_data.get("password", None):
+            validated_data["password"] = make_password(validated_data["password"])
+        return super().update(instance, validated_data)
 
     class Meta:
         model=User
-        fields = ('id','username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set', 'recommend_excel_set')
+        fields = ('id', 'password', 'username', 'sex', 'birth', 'email', 'like', 'cosreviewmodel_set', 'recommend_excel_set')
 
 
 class QaRepleSerializer(serializers.ModelSerializer):

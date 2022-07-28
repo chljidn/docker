@@ -24,7 +24,6 @@ class UserManager(BaseUserManager):
             **extra_fields
         )
         user.set_password(password) # make_password 한 결과를 뽑아낸다. AbstractBaseUser에 정의된 함수이다
-        print(user.password)
         user.save(using=self.db)
 
         return user

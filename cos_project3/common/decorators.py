@@ -30,6 +30,6 @@ def login_decorator(func):
 def update_decorator(func):
     def wrapper(self, request, *args, **kwargs):
         if not kwargs.get("partial", None):
-            return Response({"message": "사용할 수 없는 기능입니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "사용할 수 없는 기능입니다."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return func(self, request, *args, **kwargs)
     return wrapper

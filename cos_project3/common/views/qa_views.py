@@ -35,7 +35,6 @@ class qa(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         password = request.data.get('password', None)
         if password == '': password = None
-        print(request.data)
         qa = Qa.objects.create(
             postname=request.data['postname'],
             content=request.data['content'],

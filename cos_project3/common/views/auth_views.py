@@ -9,7 +9,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from common.functions import jwt_set_cookie
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from common.decorators import login_decorator, update_decorator
-
+from django.http import QueryDict
 
 # 회원가입
 class SignupView(generics.CreateAPIView):
@@ -53,50 +53,49 @@ class LoginView(TokenObtainPairView):
 
 # Refresh view
 # 재발급 받은 access token을 set-cookie 헤더에 담아 보내기.
-class MyTokenRefreshView(TokenRefreshView):
-    def post(self, request, *args, **kwargs):
-        # serializer = self.get_serializer(data=request.headers)
-        serializer = self.get_serializer(data=request.data)
-        try:
-            serializer.is_valid(raise_exception=True)
-            response = jwt_set_cookie(serializer)
-        except TokenError as e:
-            raise InvalidToken(e.args[0])
-
-        return response
+# class MyTokenRefreshView(TokenRefreshView):
+#     def post(self, request, *args, **kwargs):
+#         # serializer = self.get_serializer(data=request.headers)
+#         serializer = self.get_serializer(data=request.data)
+#         try:
+#             serializer.is_valid(raise_exception=True)
+#             response = jwt_set_cookie(serializer)
+#         except TokenError as e:
+#             raise InvalidToken(e.args[0])
+#         return response
 
 # 내 정보(조회, 수정, 삭제)
-# 수정 요
 class MyInfoView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     @login_decorator
     def retrieve(self, request, *args, **kwargs):
-        print(kwargs)
-        test_user = User.objects.get(id=kwargs["pk"])
         try:
-            if request.user == test_user:
+            if request.user == self.get_object():
                 response = super().retrieve(request, *args, **kwargs)
-            else:
-                response = Response({"message":"user not matching"})
-        except Exception as e:
-            # print(e)
-            response = Response({"message": e})
-        return response
+                return response
+            return Response({"message":"정보를 확인할 권한이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "해당 요청을 처리할 수 없습니다."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     # patch 일 경우에만 update 기능을 사용할 수 있도록 update_decorator을 통해서 partial이 없는 경우, update 기능 사용할 수 없도록 함.
     @login_decorator
     @update_decorator
     def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
-        return response
+        try:
+            response = super().update(request, *args, **kwargs)
+            return response
+        except rest_framework.exceptions.ValidationError:
+            return Response({"message": "요청 항목의 값이 올바르지 않습니다. 요청 항목의 값을 확인해주세요."})
 
     # 패스워드가 ''로 들어오는 경우는 따로 고려하지 않는다.
     # 이 부분은 프론트 쪽에서 처리하도록 한다.
     @login_decorator
     def partial_update(self, request, *args, **kwargs):
-        response = super().partial_update(request, *args, **kwargs)
-        return response
+        if request.user == self.get_object():
+            response = super().partial_update(request, *args, **kwargs)
+            return response
+        return Response({"message":"정보를 수정할 권한이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
     @login_decorator
     def destroy(self, request, *args, **kwargs):
