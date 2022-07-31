@@ -44,6 +44,9 @@
 - 화장품 리스트
 <img src="https://github.com/chljidn/docker/blob/master/cosmetic_list_detail.gif" width="300px" height="200px">
 
+- 화장품 추천
+<img src="https://github.com/chljidn/docker/blob/master/recommend_app.gif" width="300px" height="200px">
+
 - 좋아요 기능
 <img src="https://github.com/chljidn/docker/blob/master/like_app.gif" width="300px" height="200px">
 
