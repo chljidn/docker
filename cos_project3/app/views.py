@@ -12,21 +12,38 @@ from app.tasks import excel_recommend_task
 from django.core.files.storage import FileSystemStorage
 from django.http import FileResponse
 from common.decorators import login_decorator
+from app.serializers import recommend_excel_serializer
 
 # 이미지 파일은 'media/imageupload' 디렉터리 경로로 저장
+class recommend_excel_detail_view(generics.RetrieveAPIView):
+    queryset = recommend_excel.objects.all()
+    serializer_class = recommend_excel_serializer
+
+    def get_queryset(self, **kwargs):
+        queryset = recommend_excel.objects.all()
+        if kwargs.get("pk", None):
+            queryset = queryset.filter(user__id=kwargs["pk"])
+        return queryset
+
+    def retrieve(self, request, *args, **kwargs):
+        instances = self.get_queryset(**kwargs)
+        serializer = self.get_serializer(instances, many=True)
+        return Response(serializer.data)
+
+
 class image_upload(generics.CreateAPIView):
+    @login_decorator
     def create(self, request, *args, **kwargs):
         image = ImageUpload.objects.create(
             title=request.data['title'],
             pic=request.data['pic']
         )
 
-        if request.data.get("recommend_save", None):
+        if request.data["recommend_save"] == 'true':
             if request.user.is_authenticated:
                 # celery에 매개변수를 넣어 보낼 때, 그냥 image.pic를 보내면 <class 'django.db.models.fields.files.ImageFieldFile'> 객체 타입이기 때문에
                 # celery task가 작동하지 않는다. 때문에 문자열로 변경해서 보내주어야 한다.
-                excel_recommend_task.delay(str(image.pic), str(request.user.username))
-                print(str(image.pic))
+                excel_recommend_task.delay(str(image.pic), str(request.user.username), str(image.title))
                 return Response({"message": "이미지가 업로드 되었습니다. 추천이 진행 중입니다."}, status=status.HTTP_201_CREATED)
             return Response({"message": "해당 기능은 회원만 가능합니다."}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -35,14 +52,16 @@ class image_upload(generics.CreateAPIView):
         serializer = RecommendSerializer(result, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
 class recommend_file(generics.RetrieveAPIView):
+    @login_decorator
     def retrieve(self, request, pk):
         file = FileSystemStorage("media/")
         response_data = Response(file, content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet", status=status.HTTP_200_OK)
-        response_data = FileResponse(file.open(f"recommend_excel/{pk}.xlsx", "rb"), content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response_data = FileResponse(file.open(f"recommend_excel/{request.user.username}_{pk}.xlsx", "rb"), content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        # response_data = FileResponse(file.open(f"recommend_excel/test224_{pk}.xlsx", "rb"), content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response_data['Content-Disposition'] = f'attachment; filename="recommend_file_.xlsx"'
         return response_data
+
 
 class cos_list(generics.ListAPIView):
     queryset = cache.get_or_set('coslist', Cos.objects.filter().distinct().order_by('id'))

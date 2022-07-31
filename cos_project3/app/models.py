@@ -1,5 +1,6 @@
 from django.db import models
 from common.models import User
+from django.utils import timezone
 
 class ImageUpload(models.Model):
     title = models.CharField(max_length = 100)
@@ -34,6 +35,8 @@ class CosReviewModel(models.Model):
 
 class recommend_excel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    file_title = models.CharField(max_length=250)
     recommend_file_dir = models.CharField(max_length=500)
+    created_at = models.DateTimeField(default=timezone.now)
     def __str__(self):
         return self.recommend_file_dir

@@ -12,12 +12,13 @@ from app.models import recommend_excel
 
 class recommend:
 
-    def __init__(self, link, user):
+    def __init__(self, link, user, title):
         # 업로드 된 화장품 성분 이미지 주소
         self.link = link
         self.fflist = self.text()
         self.user = user
         self.user_object = User.objects.get(username=self.user)
+        self.title = title
 
     def jaccard_similarity(self, doc1, doc2):
         doc1 = set(doc1)
@@ -97,12 +98,13 @@ class excel_recommend(recommend):
             each_data = each_data.append({"상품이름":i["prdname"], "성분":i["ingredient"], "브랜드" : i["brand"],
                                           "가격":i["price"], "유사도":i["cosine"]}, ignore_index=True)
             excel_data = excel_data.append(each_data, ignore_index=True)
-        file_name = self.link.replace("imageupload/", "").replace(".png", "")
-        excel_data.to_excel(f"././media/recommend_excel/{file_name}_file.xlsx", index=False)
+        file_name = f"{self.user_object.username}_{self.title}"
+        excel_data.to_excel(f"././media/recommend_excel/{file_name}.xlsx", index=False)
 
         recommend_excel.objects.create(
-            user = self.user_object,
-            recommend_file_dir= f"recommend_excel/{file_name}_file.xlsx"
+            user=self.user_object,
+            file_title=self.title,
+            recommend_file_dir=f"recommend_excel/{file_name}.xlsx"
         )
 
 

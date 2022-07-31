@@ -29,6 +29,7 @@ class RecommendSerializer(serializers.Serializer):
     cosine = serializers.FloatField()
 
 class recommend_excel_serializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format="%Y-%m-%d")
     class Meta:
         model = recommend_excel
         fields = "__all__"

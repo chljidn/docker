@@ -8,6 +8,6 @@ def scraping_scheduling():
     sc = scraping(1)
 
 @shared_task(name="excel_recommend_task")
-def excel_recommend_task(image, user):
-    recommend_object=excel_recommend(image, user)
+def excel_recommend_task(image, user, title):
+    recommend_object=excel_recommend(image, user, title)
     recommend_object.cosine()
