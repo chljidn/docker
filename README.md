@@ -38,6 +38,7 @@
  
 ## 애플리케이션 실행 영상(영상을 클릭하시면 더 크게 보실 수 있습니다.)
 ### 영상작업은 현재 진행 중입니다. 각 기능에 대한 영상은 추후 차례대로 업로드 될 예정입니다.
+### 추후 기능의 수정 및 프론트 페이지의 변화가 있으면 
 - 회원가입 및 로그인
 <img src="https://github.com/chljidn/docker/blob/master/signup_login.gif" width="300px" height="200px" >
 
