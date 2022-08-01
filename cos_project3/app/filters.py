@@ -12,7 +12,5 @@ class CosFilter(filters.FilterSet):
 
 # class cos_list_filters(BaseFilterBackend):
 #     def filter_queryset(self, request, queryset, view):
-#         params_dict = {}
-#         for i in request.query_params.lists():
-#             params_dict[i[0]] = i[1][0]
+#         params_dict = {i[0]:i[1][0] for i in request.query_params.lists()}
 #         return queryset.filter(**params_dict)

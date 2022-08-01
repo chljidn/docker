@@ -20,9 +20,6 @@ class cos_list(generics.ListAPIView):
     # filter_backends = [cos_list_filters]
 
 
-
-
-
 # 이미지 파일은 'media/imageupload' 디렉터리 경로로 저장
 class image_upload(generics.CreateAPIView):
     @login_decorator
