@@ -10,12 +10,17 @@ from app.tasks import excel_recommend_task
 from django.core.files.storage import FileSystemStorage
 from django.http import FileResponse
 from common.decorators import login_decorator
+# from app.filters import cos_list_filters
 
 class cos_list(generics.ListAPIView):
     queryset = cache.get_or_set('coslist', Cos.objects.filter().distinct().order_by('-id'))
     serializer_class = CosSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = CosFilter
+    # filter_backends = [cos_list_filters]
+
+
+
 
 
 # 이미지 파일은 'media/imageupload' 디렉터리 경로로 저장
