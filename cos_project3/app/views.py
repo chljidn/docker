@@ -1,36 +1,24 @@
 from rest_framework.response import Response
 from rest_framework import viewsets, status, generics
-from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from app.filters import CosFilter
-from app.serializers import CosSerializer, RecommendSerializer, CosReviewSerializer
+from app.serializers import CosSerializer, RecommendSerializer, CosReviewSerializer, recommend_excel_serializer
 from app.models import ImageUpload, Cos, CosReviewModel, recommend_excel
-from common.models import User
 from app.recommend import recommend
 from django.core.cache import cache
 from app.tasks import excel_recommend_task
 from django.core.files.storage import FileSystemStorage
 from django.http import FileResponse
 from common.decorators import login_decorator
-from app.serializers import recommend_excel_serializer
+
+class cos_list(generics.ListAPIView):
+    queryset = cache.get_or_set('coslist', Cos.objects.filter().distinct().order_by('-id'))
+    serializer_class = CosSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CosFilter
+
 
 # 이미지 파일은 'media/imageupload' 디렉터리 경로로 저장
-class recommend_excel_detail_view(generics.RetrieveAPIView):
-    queryset = recommend_excel.objects.all()
-    serializer_class = recommend_excel_serializer
-
-    def get_queryset(self, **kwargs):
-        queryset = recommend_excel.objects.all()
-        if kwargs.get("pk", None):
-            queryset = queryset.filter(user__id=kwargs["pk"])
-        return queryset
-
-    def retrieve(self, request, *args, **kwargs):
-        instances = self.get_queryset(**kwargs)
-        serializer = self.get_serializer(instances, many=True)
-        return Response(serializer.data)
-
-
 class image_upload(generics.CreateAPIView):
     @login_decorator
     def create(self, request, *args, **kwargs):
@@ -38,7 +26,6 @@ class image_upload(generics.CreateAPIView):
             title=request.data['title'],
             pic=request.data['pic']
         )
-
         if request.data["recommend_save"] == 'true':
             if request.user.is_authenticated:
                 # celery에 매개변수를 넣어 보낼 때, 그냥 image.pic를 보내면 <class 'django.db.models.fields.files.ImageFieldFile'> 객체 타입이기 때문에
@@ -52,22 +39,50 @@ class image_upload(generics.CreateAPIView):
         serializer = RecommendSerializer(result, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class recommend_file(generics.RetrieveAPIView):
+
+class recommend_excel_detail_view(generics.ListAPIView):
+    queryset = recommend_excel.objects.all()
+    serializer_class = recommend_excel_serializer
+
+    def get_queryset(self, **kwargs):
+        queryset = recommend_excel.objects.all()
+        if kwargs.get("pk", None):
+            queryset = queryset.filter(user__id=kwargs["pk"])
+        return queryset
+
     @login_decorator
-    def retrieve(self, request, pk):
+    def list(self, request, *args, **kwargs):
+        instances = self.get_queryset(**kwargs)
+        serializer = self.get_serializer(instances, many=True)
+        return Response(serializer.data)
+
+
+class recommend_file(generics.RetrieveDestroyAPIView):
+    @login_decorator
+    def retrieve(self, request, *args, **kwargs):
         file = FileSystemStorage("media/")
-        response_data = Response(file, content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet", status=status.HTTP_200_OK)
-        response_data = FileResponse(file.open(f"recommend_excel/{request.user.username}_{pk}.xlsx", "rb"), content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        # response_data = FileResponse(file.open(f"recommend_excel/test224_{pk}.xlsx", "rb"), content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        response_data['Content-Disposition'] = f'attachment; filename="recommend_file_.xlsx"'
-        return response_data
+        response = Response(file,
+                            content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            status=status.HTTP_200_OK
+                            )
+        response = FileResponse(file.open(f"recommend_excel/{request.user.username}_{kwargs['pk']}.xlsx", "rb"),
+                                content_type="application//vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                )
+        response['Content-Disposition'] = f'attachment; filename="recommend_file_.xlsx"'
+        return response
 
-
-class cos_list(generics.ListAPIView):
-    queryset = cache.get_or_set('coslist', Cos.objects.filter().distinct().order_by('id'))
-    serializer_class = CosSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = CosFilter
+    @login_decorator
+    def destroy(self, request, *args, **kwargs):
+        try:
+            file = FileSystemStorage("media/recommend_excel/")
+            if file.exists(f"{request.user.username}_{kwargs['pk']}.xlsx"):
+                file.delete(f"{request.user.username}_{kwargs['pk']}.xlsx")
+                my_recommend = recommend_excel.objects.filter(user_id=request.user.id, file_title=kwargs["pk"])
+                my_recommend.delete()
+                return Response({"message": "해당 추천 파일이 삭제되었습니다."}, status=status.HTTP_200_OK)
+            return Response({"message": "해당 파일이 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"message" : e}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class cosLike(generics.CreateAPIView):
@@ -85,13 +100,6 @@ class cos_review(viewsets.ModelViewSet):
     queryset = CosReviewModel.objects.all()
     serializer_class = CosReviewSerializer
 
-    def get_permissions(self):
-        if self.action in ['create', 'partial_update', "destroy"]:
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = []
-        return [permission() for permission in permission_classes ]
-
     @login_decorator
     def create(self, request):
         review = CosReviewModel.objects.create(
@@ -106,12 +114,14 @@ class cos_review(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
 
+    @login_decorator
     def partial_update(self, request, *args, **kwargs):
         if request.user == self.get_object().reviewUser:
             super().partial_update(request, *args, **kwargs)
             return Response(status=status.HTTP_200_OK)
         return Response({'message' : '해당 글을 수정할 수 있는 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
 
+    @login_decorator
     def destroy(self, request, *args, **kwargs):
         if request.user == self.get_object().reviewUser:
             super().destroy(request, *args, **kwargs)
