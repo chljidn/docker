@@ -2,33 +2,68 @@ from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
 from common.models import Qa, User
 
-# 유저 인증(회원가입, 로그인) 및 유저 정보(읽기, 수정, 삭제) 테스트
+# 회원가입 테스트
 class auth_user_request_tests(APITestCase):
-    auth_url = reverse('common:auth')
-    useredit_url = reverse('common:useredit')
+    signup_url = reverse('common:signup')
 
-    # 유저 생성하여 setUp
+    # 유저 생성 setup
     def setUp(self):
-        # response = self.client.post(self.auth_url,
-        #                             {
-        #                                 'username': 'test',
-        #                                 'password': 'testpasswd123',
-        #                                 'sex': 'M',
-        #                                 'birth': '1995-05-05',
-        #                                 'email': 'test@test.com'
-        #                             }, format='json')
-        setup_data = {'username': 'test', 'password': 'testpasswd123', 'sex': 'M', 'birth': '1995-05-05', 'email': 'test@test.com'}
+        setup_data = {'username': 'test1', 'password': 'testpasswd', 'sex': 'M', 'birth': '1995-05-05', 'email': 'test1@test.com'}
+        User.objects.create_user(**setup_data)
+
+    def test_user_signup(self):
+        response = self.client.post(self.signup_url, {'username': 'test2',
+                                                      'password': 'testpasswd',
+                                                      'sex': 'M',
+                                                      'birth': '1995-05-05',
+                                                      'email': 'test2@test.com'}, format='json')
+        self.assertEqual(response.status_code, 201)
+
+    # 중복되는 회원이 있어 예외 발생(아이디 중복 or 이메일 중복)
+    def test_user_signup_duplicate_error(self):
+        user_data = {'username': 'test1', 'password': 'testpasswd', 'sex': 'M', 'birth': '1995-05-05',
+                      'email': 'test1@test.com'}
+        response = self.client.post(self.signup_url, user_data)
+        self.assertEqual(response.status_code, 409)
+
+    # 모든 데이터가 충족되지 않을 경우 예외 발생(아이디 공백 or 패스워드 공백 등)
+    # api에서 status_code = 400 할 수 있도록 수정 요망.
+    def test_user_signup_not_enough_error(self):
+        user_data = {'username': 'test2','password': 'testpasswd', 'sex': 'M', 'birth': '1995-05-05'}
+        response = self.client.post(self.signup_url, user_data)
+        self.assertEqual(response.status_code, 409)
+
+
+# 로그인 테스트
+class login_request_tests(APITestCase):
+    login_url = reverse('common:login')
+
+    # 유저 생성 setup
+    def setUp(self):
+        setup_data = {'username': 'test1', 'password': 'testpasswd', 'sex': 'M', 'birth': '1995-05-05', 'email': 'test1@test.com'}
         User.objects.create_user(**setup_data)
 
     # 유저 로그인
     def test_user_login(self):
-        response = self.client.post(self.auth_url, {'username': 'test', 'password': 'testpasswd123'}, format='json')
-        token = response.data['access']
+        response = self.client.post(self.login_url, {'username': 'test1', 'password': 'testpasswd'}, format='json')
         self.assertEqual(response.status_code, 200)
 
+    # 존재하지 않는 회원이 로그인 요청할 경우 예외 발생
     def test_user_login_error(self):
-        response = self.client.post(self.auth_url, {'username': 'test', 'password': 'testpasswd'}, format='json')
+        response = self.client.post(self.login_url, {'username': 'test', 'password': 'testpasswd'}, format='json')
         self.assertEqual(response.status_code, 400)
+
+    # 패스워드나 아이디가 틀린 상태로 로그인을 요청할 경우 예외 발생
+    def test_user_login_wrong_data_error(self):
+        response = self.client.post(self.login_url, {'username': 'test1', 'password': 'testpass'}, format='json')
+        self.assertEqual(response.status_code, 400)
+
+
+class myinfo_request_tests(APITestCase):
+
+    def setUp(self):
+        pass
+
 #
 #     # 유저 정보 읽기(마이 페이지)
 #     def test_user_get(self):

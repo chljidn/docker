@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase, APIRequestFactory
 from common.models import User
-from common.serializers import UserSerializers
+from common.serializers import UserSerializer
 
 class user_serializer_test(APITestCase):
     def setUp(self):
@@ -11,13 +11,13 @@ class user_serializer_test(APITestCase):
 
     def test_user_serializer(self):
         user = User.objects.get(username="test_serializer")
-        serializer = UserSerializers(user)
+        serializer = UserSerializer(user)
         data = serializer.data
         # username, email, birth, sex, like(related), cosreviewmodel_set(related), recommend_excel_set => 7
-        self.assertEqual(len(data), 7)
+        self.assertEqual(len(data), 8)
 
         user = User.objects.all()
-        serializer = UserSerializers(user, many=True)
+        serializer = UserSerializer(user, many=True)
         # queryset object => test_serializer, staff_serializer = 2
         self.assertEqual(len(serializer.data), 2)
 

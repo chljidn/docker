@@ -104,14 +104,17 @@ class cos_review(viewsets.ModelViewSet):
 
     @login_decorator
     def create(self, request):
-        review = CosReviewModel.objects.create(
-            reviewName=request.data['reviewName'],
-            reviewContent=request.data['reviewContent'],
-            reviewImage=request.data['reviewImage'],
-            reviewUser=request.user,
-            reviewCos=Cos.objects.get(id=request.data['cos_id'])
-        )
-        return Response(status=status.HTTP_201_CREATED)
+        try:
+            review = CosReviewModel.objects.create(
+                reviewName=request.data['reviewName'],
+                reviewContent=request.data['reviewContent'],
+                reviewImage=request.data['reviewImage'],
+                reviewUser=request.user,
+                reviewCos=Cos.objects.get(id=request.data['cos_id'])
+            )
+            return Response(status=status.HTTP_201_CREATED)
+        except:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, *args, **kwargs):
         return Response(status=status.HTTP_501_NOT_IMPLEMENTED)

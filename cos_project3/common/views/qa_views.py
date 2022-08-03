@@ -1,13 +1,15 @@
-from rest_framework import viewsets, generics, mixins, status
+from rest_framework import viewsets, generics, mixins, status, decorators, exceptions
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from common.paginations import QaPagination
 from common import serializers
 from common.models import Qa, QaReple
-from django_filters.rest_framework import DjangoFilterBackend
 from common.filters import QaFilter
-from django.core import exceptions
-from common.decorators import login_decorator
+from common.decorators import login_decorator, update_decorator
+from django.contrib.auth.hashers import check_password, make_password
+from django_filters.rest_framework import DjangoFilterBackend
+from django.http.response import Http404
+from django.utils.datastructures import MultiValueDictKeyError
 
 # QNA
 class qa(viewsets.ModelViewSet):
@@ -17,55 +19,60 @@ class qa(viewsets.ModelViewSet):
     filterset_class = QaFilter
     pagination_class = QaPagination
 
-    def retrieve(self, request, *args, **kwargs):
+    @decorators.action(detail=True, methods=['post'])
+    def password_retrieve(self, request, *args, **kwargs):
         try:
-            qaDetail = Qa.objects.get(id=kwargs['pk'])
-        except exceptions.ObjectDoesNotExist:
-            return Response({"message": "Q&A가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            if getattr(qaDetail, "password"):
-                if request.data.get("password", None) and request.data["password"] == qaDetail.password:
-                    serialize = self.serializer_class(qaDetail)
-                    return Response(serialize.data, status=status.HTTP_200_OK)
-                return Response({"message":"패스워드가 일치하지 않습니다."}, status=status.HTTP_401_UNAUTHORIZED)
-            serialize = self.serializer_class(qaDetail)
-            return Response(serialize.data, status=status.HTTP_200_OK)
+            qa_detail = self.get_object()
+            password = request.data.get("password", None)
+            # 패스워드 파라미터가 없을 경우, null로 설정.
+            if not qa_detail.password or check_password(password, qa_detail.password):
+                response = super().retrieve(request, *args, **kwargs)
+                return response
+            return Response({"message": "패스워드가 일치하지 않습니다."}, status=status.HTTP_401_UNAUTHORIZED)
+        except Http404:
+            return Response({"message": "해당 질문이 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
 
     @login_decorator
     def create(self, request, *args, **kwargs):
-        password = request.data.get('password', None)
-        if password == '': password = None
-        qa = Qa.objects.create(
-            postname=request.data['postname'],
-            content=request.data['content'],
-            password=password,
-            qa_user=request.user
-        )
-        return Response({'message':'질문글이 저장되었습니다.'}, status=status.HTTP_201_CREATED)
+        try:
+            password = request.data.get('password', None)
+            if password: password = make_password(password)
+            qa = Qa.objects.create(
+                postname=request.data['postname'],
+                content=request.data['content'],
+                password=password,
+                qa_user=request.user
+            )
+            return Response({'message':'질문이 저장되었습니다.'}, status=status.HTTP_201_CREATED)
+        except exceptions.ValidationError as e:
+            return Response({"message" : e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
+    @update_decorator
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+        try:
+            response = super().update(request, *args, **kwargs)
+            return response
+        except exceptions.ValidationError:
+            return Response({"message": "요청 항목의 값이 올바르지 않습니다. 요청 항목의 값을 확인해주세요."})
 
     @login_decorator
     def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        instance = self.get_object()
-        if request.user != instance.qa_user:
-            return Response({'message': '질문을 수정할 수 있는 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            instance = self.get_object()
+            if request.user != instance.qa_user:
+                return Response({'message': '질문을 수정할 수 있는 권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
+            response = super().partial_update(request, *args, **kwargs)
+            return response
+        except Http404:
+            return Response({"message": "해당 질문이 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
 
-        # qna 객체가 기존에 패스워드 값을 가지고 있는데 패스워드가 일치하지 않을 경우에만 error 리턴
-        if getattr(instance, 'password'):
-            if instance.password != request.data['password']:
-                return Response({'message':'패스워드가 일치하지 않습니다. 패스워드를 다시 확인해 주세요.'}, status=status.HTTP_401_UNAUTHORIZED)
-        super().partial_update(request, *args, **kwargs)
-        return Response(status=status.HTTP_200_OK)
-
+    @login_decorator
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if request.user != instance.qa_user:
-            return Response({'message' : '질문글을 삭제할 수 있는 권한이 없습니다. 작성자만이 질문글을 삭제할 수 있습니다.'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'message' : '질문을 삭제할 수 있는 권한이 없습니다. 작성자만이 질문을 삭제할 수 있습니다.'}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"message":"질문이 삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
 
 
 class qa_reple_list(generics.ListCreateAPIView):

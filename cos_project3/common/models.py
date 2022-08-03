@@ -102,11 +102,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     get_full_name.short_description = _('Full name')
 
+
+
 # Q&A 게시판 모델
 class Qa(models.Model):
     postname = models.CharField(max_length=200)
     content = models.TextField(default='')
-    password = models.CharField(max_length=30, null=True)
+    password = models.CharField(max_length=200, null=True)
     # user 테이블의 기본키인 id를 외래키로 사용하게 된다.
     # 한 유저당 여러 개의 Q&A를 작성할 수 있으므로 기본키는 따로 존재하고 외래키는 기본키로 쓰이지 않는다.
     # user(1) --- qa(N)

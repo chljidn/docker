@@ -23,14 +23,12 @@ class SignupView(generics.CreateAPIView):
             self.perform_create(serializer)
             message = {"message" : "회원가입이 완료되었습니다."}
             signup_status = status.HTTP_201_CREATED
-        except MultiValueDictKeyError:
-            message = {"message": "회원가입에 실패했습니다. 회원정보를 정확히 입력하세요."}
-            signup_status = status.HTTP_400_BAD_REQUEST
-        except rest_framework.exceptions.ValidationError as e:
-            message = {"message": e.detail}
-            signup_status = status.HTTP_409_CONFLICT
-        finally:
             return Response(message, status=signup_status)
+        except MultiValueDictKeyError:
+            return Response({"message": "회원가입에 실패했습니다. 회원정보를 정확히 입력하세요."}, status=status.HTTP_400_BAD_REQUEST)
+        except rest_framework.exceptions.ValidationError as e:
+            return Response({"message": e.detail}, status=status.HTTP_409_CONFLICT)
+
 
 # 로그인
 class LoginView(TokenObtainPairView):
@@ -45,7 +43,6 @@ class LoginView(TokenObtainPairView):
             data = {"access" : access, "refresh" : refresh, "id": serializer.user.id}
             response = Response(data, status=status.HTTP_200_OK)
             return response
-
         # 아이디나 비밀번호가 잘못될 경우 is_valid 부분에서 에러 발생 가능.
         # non_field_errors 에러 발생
         except serializers.ValidationError:
