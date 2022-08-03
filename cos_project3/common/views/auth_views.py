@@ -48,6 +48,7 @@ class LoginView(TokenObtainPairView):
         except serializers.ValidationError:
             return Response({"message" : "인증정보가 정확하지 않습니다. 아이디와 비밀번호를 다시 확인해주세요"}, status=status.HTTP_400_BAD_REQUEST)
 
+
 # Refresh view
 # 재발급 받은 access token을 set-cookie 헤더에 담아 보내기.
 # class MyTokenRefreshView(TokenRefreshView):
@@ -60,6 +61,7 @@ class LoginView(TokenObtainPairView):
 #         except TokenError as e:
 #             raise InvalidToken(e.args[0])
 #         return response
+
 
 # 내 정보(조회, 수정, 삭제)
 class MyInfoView(generics.RetrieveUpdateDestroyAPIView):
@@ -103,18 +105,3 @@ class MyInfoView(generics.RetrieveUpdateDestroyAPIView):
             return Response({'message': '패스워드가 일치하지 않습니다. 회원 탈퇴를 위해서는 정확한 패스워드가 필요합니다.'}, status=status.HTTP_401_UNAUTHORIZED)
         except KeyError:
             return Response({"message" : "패스워드를 입력하여 주세요."}, status=status.HTTP_400_BAD_REQUEST)
-
-# 패스워드가 탈취된 경우 refresh 토큰을 블랙리스트에 추가시켜 사용하지 못하도록 한다.
-# 형식은 refresh token을 받아서 blacklist에 추가시키는 것. refresh token은 content 부분에 담겨 보내진다.
-# class blacklist(APIView):
-#     permission_classes = [IsAuthenticated]
-#     def post(self, reuqest):
-#         try:
-#             refresh_token = reuqest.data['refresh']
-#             token = RefreshToken(refresh_token)
-#             token.blacklist()
-#             return Response(status=status.HTTP_205_RESET_CONTENT)
-#         except Exception as e:
-#             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-

@@ -19,6 +19,11 @@ class qa(viewsets.ModelViewSet):
     filterset_class = QaFilter
     pagination_class = QaPagination
 
+    def retrieve(self, request, *args, **kwargs):
+        if self.get_object().password:
+            return self.password_retrieve(request, *args, **kwargs)
+        return super().retrieve(request, *args, **kwargs)
+
     @decorators.action(detail=True, methods=['post'])
     def password_retrieve(self, request, *args, **kwargs):
         try:
@@ -53,7 +58,7 @@ class qa(viewsets.ModelViewSet):
             response = super().update(request, *args, **kwargs)
             return response
         except exceptions.ValidationError:
-            return Response({"message": "요청 항목의 값이 올바르지 않습니다. 요청 항목의 값을 확인해주세요."})
+            return Response({"message": "요청 항목의 값이 올바르지 않습니다. 요청 항목의 값을 확인해주세요."}, status=status.HTTP_400_BAD_REQUEST)
 
     @login_decorator
     def partial_update(self, request, *args, **kwargs):
@@ -78,7 +83,6 @@ class qa(viewsets.ModelViewSet):
 class qa_reple_list(generics.ListCreateAPIView):
     queryset = QaReple.objects.all()
     serializer_class = serializers.QaRepleSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return self.queryset.filter(repleUser=self.request.user).order_by("-repleDate")
