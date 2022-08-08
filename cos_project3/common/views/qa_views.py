@@ -20,7 +20,10 @@ class qa(viewsets.ModelViewSet):
     pagination_class = QaPagination
 
     def retrieve(self, request, *args, **kwargs):
-        if self.get_object().password:
+        print(self.get_object().id)
+        print(self.get_object().postname)
+        print(self.get_object().password)
+        if self.get_object().password is not None:
             return self.password_retrieve(request, *args, **kwargs)
         return super().retrieve(request, *args, **kwargs)
 
@@ -62,6 +65,7 @@ class qa(viewsets.ModelViewSet):
 
     @login_decorator
     def partial_update(self, request, *args, **kwargs):
+        print(request.data)
         try:
             instance = self.get_object()
             if request.user != instance.qa_user:
@@ -73,10 +77,9 @@ class qa(viewsets.ModelViewSet):
 
     @login_decorator
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if request.user != instance.qa_user:
+        if request.user != self.get_object().qa_user:
             return Response({'message' : '질문을 삭제할 수 있는 권한이 없습니다. 작성자만이 질문을 삭제할 수 있습니다.'}, status=status.HTTP_403_FORBIDDEN)
-        self.perform_destroy(instance)
+        self.perform_destroy(self.get_object())
         return Response({"message":"질문이 삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
 
 

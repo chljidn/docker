@@ -25,7 +25,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         model=User
         fields = ('username', 'sex', 'birth', 'email', 'password')
 
-
+4
 class QaRepleSerializer(serializers.ModelSerializer):
     repleUser = serializers.StringRelatedField()
     class Meta:
@@ -37,7 +37,7 @@ class QaSerializers(serializers.ModelSerializer):
     # StringRelateField로 설정하면 username만 가져온다
     # 즉 User 모델에서 def __str__ 로 설정한 필드값만 직렬화에 포함된다.
     qa_user = serializers.StringRelatedField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, allow_null=True)
     qareple_set = QaRepleSerializer(read_only=True, many=True)
     qaDate = serializers.DateTimeField(default=timezone.now, format="%Y-%m-%d")
 
