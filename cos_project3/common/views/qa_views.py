@@ -1,3 +1,5 @@
+import django.core.exceptions
+import rest_framework.exceptions
 from rest_framework import viewsets, generics, mixins, status, decorators, exceptions
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -20,9 +22,6 @@ class qa(viewsets.ModelViewSet):
     pagination_class = QaPagination
 
     def retrieve(self, request, *args, **kwargs):
-        print(self.get_object().id)
-        print(self.get_object().postname)
-        print(self.get_object().password)
         if self.get_object().password is not None:
             return self.password_retrieve(request, *args, **kwargs)
         return super().retrieve(request, *args, **kwargs)
@@ -65,7 +64,6 @@ class qa(viewsets.ModelViewSet):
 
     @login_decorator
     def partial_update(self, request, *args, **kwargs):
-        print(request.data)
         try:
             instance = self.get_object()
             if request.user != instance.qa_user:
@@ -92,16 +90,22 @@ class qa_reple_list(generics.ListCreateAPIView):
 
     @login_decorator
     def create(self, request, *args, **kwargs):
-        reple = QaReple.objects.create(
-            content=request.data['content'],
-            qa=Qa.objects.get(id=request.data['pk']),
-            repleUser=request.user
-        )
-        return Response({"message": "답글 등록이 완료되었습니다."}, status=status.HTTP_201_CREATED)
+        try:
+            reple = QaReple.objects.create(
+                content=request.data['content'],
+                qa=Qa.objects.get(id=request.data['pk']),
+                repleUser=request.user
+            )
+            serializer = serializers.QaRepleSerializer(reple)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except django.core.exceptions.ObjectDoesNotExist:
+            return Response({"message": "해당 질문이 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
 
 class qa_reple_detail(mixins.DestroyModelMixin, generics.GenericAPIView):
+    queryset = QaReple.objects.all()
+    @login_decorator
     def delete(self, request, *args, **kwargs):
-        reple = QaReple.objects.get(id=kwargs['pk'])
-        if request.user == reple.repleUser:
-            reple.delete()
-        return Response(status=status.HTTP_200_OK)
+        if request.user == self.get_object().repleUser:
+            self.get_object().delete()
+            return Response(status=status.HTTP_200_OK)
+        return Response({"message":"유저가 일치하지 않습니다. 자신이 작성한 리플만 삭제할 수 있습니다."}, status=status.HTTP_403_FORBIDDEN)

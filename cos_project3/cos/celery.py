@@ -4,22 +4,10 @@ from celery import Celery
 from celery.schedules import crontab
 import os
 
-from datetime import timedelta
-from django.conf import settings
-
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cos.settings')
-
-
 app = Celery('cos_project3')
-
 app.config_from_object('django.conf:settings', namespace='CELERY')
-
 app.autodiscover_tasks()
-
-# @app.task(bind=True)
-# def debug_task(self):
-#     print(f'Request: {self.request!r}')
 
 app.conf.beat_schedule = {
     'add-week-scraping': {

@@ -5,6 +5,7 @@ from rest_framework import status
 from datetime import datetime
 from common.models import User
 from rest_framework import exceptions as rest_exceptions
+from rest_framework_simplejwt import exceptions as simple_exceptions
 
 def login_decorator(func):
     def wrapper(self, request, *args, **kwargs):
@@ -21,6 +22,8 @@ def login_decorator(func):
         except jwt.exceptions.DecodeError:
             return Response({"message": "토큰이 유효하지 않습니다."}, status=status.HTTP_401_UNAUTHORIZED)
         except jwt.exceptions.ExpiredSignatureError:
+            return Response({"message": "토큰의 유효기간이 만료되었습니다. 재인증 해주세요"}, status=status.HTTP_401_UNAUTHORIZED)
+        except jwt.exceptions.InvalidTokenError:
             return Response({"message": "토큰의 유효기간이 만료되었습니다. 재인증 해주세요"}, status=status.HTTP_401_UNAUTHORIZED)
         except request.user.DoesNotExist:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
